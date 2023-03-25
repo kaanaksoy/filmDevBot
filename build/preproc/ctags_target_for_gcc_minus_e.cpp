@@ -1,58 +1,48 @@
 # 1 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 /*
 
-  Blink
+  Film Development Bot
 
-Turns an LED on for one second, then off for one second, repeatedly.
 
-Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
 
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
+  Automates your film development using AP Tanks. 
 
-  the correct LED pin independent of which board is used.
 
-  If you want to know what pin the on-board LED is connected to on your Arduino
 
-  model, check the Technical Specs of your board at:
+last modified 25 March 2023
 
-  https://www.arduino.cc/en/Main/Products
+  by Kaan Aksoy
 
-modified 8 May 2014
 
-  by Scott Fitzgerald
-
-  modified 2 Sep 2016
-
-  by Arturo Guadalupi
-
-  modified 8 Sep 2016
-
-  by Colby Newman
-
-This example code is in the public domain.
-
-https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink
 
 */
-# 19 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
-// the setup function runs once when you press reset or power the board
+# 11 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+/* ---- PIN DEFINITIONS ---- */
 
 // UI Pins
 
 
 
-//Encoder Pins
+
+//Encoder Pins 
+/* 
+
+  (Using Encoder Breakout Board with pullip resistors. 
+
+  If you dont have pullup resistors, you can enable the built in ones.
+
+*/
+
+//Motor Driver Pins (Using Mini L298 Motor Driver Board)
 
 
 
-//Motor Driver Pins
 
 
+//Flag used to switch motor direction on every agitation.
+bool agitateDirectionFlag = true;
 
-
-
-bool agitateDirectionFlag = true; //Flag used to switch motor direction on every agitation.
-
+// the setup function runs once when you press reset or power the board
 void setup() {
   // initialize motor output pins.
   pinMode(8 /* Agitate Motor 1*/, 0x1);
@@ -62,8 +52,6 @@ void setup() {
 }
 // the loop function runs over and over again forever
 void loop() {
-  agitate(1000);
-  delay(1000);
   vibrate();
 }
 
@@ -95,8 +83,9 @@ void vibrate(){
   {
   analogWrite(10 /* Vibrate Motor 1*/, 255);
   analogWrite(11 /* Vibrate Motor 2*/, 0);
-  delay(2000);
+  delay(1000);
   analogWrite(10 /* Vibrate Motor 1*/, 0);
   analogWrite(11 /* Vibrate Motor 2*/, 0);
+  delay(500);
   }
 }

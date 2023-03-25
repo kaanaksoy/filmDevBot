@@ -43,7 +43,6 @@ void setup() {
 }
 // the loop function runs over and over again forever
 void loop() {
-
 }
 
 // Agitate function controls the agitation motor.
@@ -74,8 +73,9 @@ void vibrate(){
   {
   analogWrite(MOT_IN3, 255);
   analogWrite(MOT_IN4, 0);
-  delay(2000);
+  delay(1000);
   analogWrite(MOT_IN3, 0);
   analogWrite(MOT_IN4, 0);
+  delay(500);
   }
 }
