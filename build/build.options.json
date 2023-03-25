@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "../../..,../../..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "",
+  "fqbn": "arduino:avr:uno",
+  "hardwareFolders": "/Users/kaan/Library/Arduino15/packages",
+  "otherLibrariesFolders": "/Users/kaan/Documents/Arduino/libraries",
+  "runtime.ide.version": "10607",
+  "sketchLocation": "/Users/kaan/Documents/Arduino/filmDevBot"
+}
