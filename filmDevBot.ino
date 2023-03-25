@@ -17,14 +17,60 @@ This example code is in the public domain.
 https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink
 */
 // the setup function runs once when you press reset or power the board
+
+// UI Pins
+#define BUZZER 2
+#define GREEN_LED 3
+#define RED_LED 4
+//Encoder Pins
+#define ENC_SW 5
+#define ENC_DT 6
+#define ENC_CLK 7
+//Motor Driver Pins
+#define MOT_IN1 8
+#define MOT_IN2 9
+#define MOT_IN3 10
+#define MOT_IN4 11
+
+bool agitateDirectionFlag = true; //Flag used to switch motor direction on every agitation.
+
 void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  // initialize motor output pins.
+  pinMode(MOT_IN1, OUTPUT);
+  pinMode(MOT_IN2, OUTPUT);
+  pinMode(MOT_IN3, OUTPUT);
+  pinMode(MOT_IN4, OUTPUT);
 }
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);                       // wait for a second
+}
+
+void agitate(int duration){
+  switch (agitateDirectionFlag)
+  {
+  case true:
+    analogWrite(MOT_IN1, 255);
+    analogWrite(MOT_IN2, 0);
+    delay(duration);
+    agitateDirectionFlag = false;
+    break;
+  case false:
+  default:
+    analogWrite(MOT_IN1, 0);
+    analogWrite(MOT_IN2, 255);
+    delay(duration);
+    agitateDirectionFlag = true;
+    break;
+  }
+}
+
+void vibrate(){
+  for (int i = 0; i < 4; i++)
+  {
+  analogWrite(MOT_IN3, 255);
+  analogWrite(MOT_IN4, 0);
+  delay(2000);
+  analogWrite(MOT_IN3, 0);
+  analogWrite(MOT_IN4, 0);
+  }
 }
