@@ -11,6 +11,16 @@
   },
   {
     "Sourcefile": "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp",
+    "Include": "Encoder.h",
+    "Includepath": "/Users/kaan/Documents/Arduino/libraries/Encoder"
+  },
+  {
+    "Sourcefile": "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/Users/kaan/Documents/Arduino/libraries/Encoder/Encoder.cpp",
     "Include": "",
     "Includepath": null
   }

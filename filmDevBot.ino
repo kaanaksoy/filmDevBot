@@ -1,3 +1,5 @@
+#include <Encoder.h>
+
 /*
   Film Development Bot
 
@@ -11,18 +13,19 @@ last modified 25 March 2023
 /* ---- PIN DEFINITIONS ---- */
 
 // UI Pins
-#define BUZZER 2
-#define GREEN_LED 3
-#define RED_LED 4
+#define BUZZER 5
+#define GREEN_LED 6
+#define RED_LED 7
 
 //Encoder Pins 
 /* 
   (Using Encoder Breakout Board with pullip resistors. 
   If you dont have pullup resistors, you can enable the built in ones.
 */
-#define ENC_SW 5 // Encoder Button
-#define ENC_DT 6 // Encoder Out A
-#define ENC_CLK 7 // Encoder Out B
+#define ENC_SW 4 // Encoder Button
+#define ENC_DT 3 // Encoder In A
+#define ENC_CLK 2 // Encoder In B
+Encoder encoder(2, 3);
 
 //Motor Driver Pins (Using Mini L298 Motor Driver Board)
 #define MOT_IN1 8 // Agitate Motor 1
@@ -31,7 +34,10 @@ last modified 25 March 2023
 #define MOT_IN4 11 // Vibrate Motor 2
 
 //Flag used to switch motor direction on every agitation.
-bool agitateDirectionFlag = true; 
+bool agitateDirectionFlag = true;
+
+//Menu option selection marker.
+int menu = 1;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -40,19 +46,46 @@ void setup() {
   pinMode(MOT_IN2, OUTPUT);
   pinMode(MOT_IN3, OUTPUT);
   pinMode(MOT_IN4, OUTPUT);
+
+  // Initialize UI Pins
+  pinMode(BUZZER, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+
+  pinMode(ENC_SW, INPUT);
+
+
 }
 // the loop function runs over and over again forever
 void loop() {
+  if (encoder.read() > menu){
+    menu++;
+    encoder.write(menu);
+    updateMenu();
+    delay(100);
+  }
+  if (encoder.read() < menu){
+    menu--;
+    encoder.write(menu);
+    updateMenu();
+    delay(100);
+  }
+  if (!digitalRead(ENC_SW)){
+    executeAction();
+    updateMenu();
+    encoder.write(menu);
+    delay(100);
+  }
 }
 
 // Agitate function controls the agitation motor.
-void agitate(int duration){
+void agitate(int durationSeconds){
   switch (agitateDirectionFlag)
   {
   case true:
     analogWrite(MOT_IN1, 255);
     analogWrite(MOT_IN2, 0);
-    delay(duration);
+    delay(durationSeconds * 1000);
     analogWrite(MOT_IN1, 0);
     agitateDirectionFlag = false;
     break;
@@ -60,14 +93,15 @@ void agitate(int duration){
   default:
     analogWrite(MOT_IN1, 0);
     analogWrite(MOT_IN2, 255);
-    delay(duration);
+    delay(durationSeconds * 1000);
     analogWrite(MOT_IN2, 0);
     agitateDirectionFlag = true;
     break;
   }
+  return;
 }
 
-//Simple vibrate function, used to release air bubbles fromt the emulsion surface.
+//Simple vibrate function, used to release air bubbles from the emulsion surface.
 void vibrate(){
   for (int i = 0; i < 4; i++)
   {
@@ -78,4 +112,112 @@ void vibrate(){
   analogWrite(MOT_IN4, 0);
   delay(500);
   }
+  return;
+}
+
+void buzz(int repeatTimes){
+  for (int i = 0; i < repeatTimes; i++)
+  {
+    tone(BUZZER, 4000, 125);
+    delay(250);
+  }
+  
+}
+
+//Displays the Menu Options on the LCD based on selection via Encoder
+void updateMenu( ){
+  switch (menu)
+  {
+  case 0:
+    menu = 1;
+    break;
+  case 1:
+    lcd.clear();
+    lcd.print(">Option 1");
+    lcd.setCursor(0, 1);
+    lcd.print(" Option 2");
+    break;
+  case 2:
+    lcd.clear();
+    lcd.print(" Option 1");
+    lcd.setCursor(0, 1);
+    lcd.print(">Option 2");
+    break;
+  case 3:
+    lcd.clear();
+    lcd.print(">Option 3");
+    lcd.setCursor(0, 1);
+    lcd.print(" Option 4");
+    break;
+  case 4:
+    lcd.clear();
+    lcd.print(" Option 3");
+    lcd.setCursor(0, 1);
+    lcd.print(">Option 4");
+    break;
+  case 5:
+    menu = 4;
+    break;
+  }
+}
+
+// Executes action selected via LCD & Encoder
+void executeAction() {
+  switch (menu) {
+    case 1: //C-41 Standard
+      //develop();
+      //fix();
+      break;
+    case 2: //C-41 Push 1 Stop
+      //develop();
+      //fix();
+      break;
+    case 3: // C-41 Push 2 Stops
+      //develop();
+      //fix();
+      break;
+    case 4: // C-41 Push 3 Stops
+      //develop();
+      //fix();
+      break;
+  }
+}
+
+//Develop function that handles the development process. all values as seconds
+void develop(uint16_t devDuration, 
+              uint8_t firstAgitationDuration, 
+              uint8_t agitationDuration, 
+              uint16_t agitateEveryDuration){
+  uint8_t totalCycles = (devDuration - firstAgitationDuration) / (agitationDuration + agitateEveryDuration);
+  uint8_t padding = (devDuration - firstAgitationDuration) % (agitationDuration + agitateEveryDuration);
+
+  agitate(firstAgitationDuration);
+  vibrate();
+  for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
+  {
+    delay(agitateEveryDuration * 1000);
+    agitate(agitationDuration);
+    if (cycleCount + 2 >= totalCycles)
+    {
+      buzz(3);
+    }
+    delay(padding * 1000);
+    buzz(5);
+    
+  }
+  return;
+}
+
+//fix function handles the Fixing Step of the process. vales in seconds. 
+void fix(uint8_t fixingDuration){
+  uint8_t totalCycles = fixingDuration * 2;
+  vibrate();
+  for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
+  {
+    agitate(15);
+    delay(15 * 1000);
+  }
+  buzz(6);
+  return;
+  
 }

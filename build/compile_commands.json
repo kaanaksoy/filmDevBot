@@ -23,6 +23,7 @@
    "-DARDUINO_ARCH_AVR",
    "-I/Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
    "-I/Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
+   "-I/Users/kaan/Documents/Arduino/libraries/Encoder",
    "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp",
    "-o",
    "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp.o"
