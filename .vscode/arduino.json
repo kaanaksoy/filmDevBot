@@ -2,6 +2,6 @@
     "sketch": "filmDevBot.ino",
     "output": "build",
     "board": "arduino:avr:uno",
-    "port": "/dev/tty.usbmodem141301",
+    "port": "/dev/tty.usbmodem141201",
     "programmer": "avrisp"
 }

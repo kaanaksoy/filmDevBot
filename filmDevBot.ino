@@ -1,4 +1,5 @@
 #include <Encoder.h>
+#include <LCD_I2C.h>
 
 /*
   Film Development Bot
@@ -12,6 +13,9 @@ last modified 25 March 2023
 
 /* ---- PIN DEFINITIONS ---- */
 
+LCD_I2C lcd(0x27); //Default LCD Address. Change for your module.
+#define TITLE "  Film Dev Bot  "
+
 // UI Pins
 #define BUZZER 5
 #define GREEN_LED 6
@@ -22,10 +26,10 @@ last modified 25 March 2023
   (Using Encoder Breakout Board with pullip resistors. 
   If you dont have pullup resistors, you can enable the built in ones.
 */
-#define ENC_SW 4 // Encoder Button
+#define ENC_SW 2 // Encoder Button
 #define ENC_DT 3 // Encoder In A
-#define ENC_CLK 2 // Encoder In B
-Encoder encoder(2, 3);
+#define ENC_CLK 4 // Encoder In B
+Encoder encoder(ENC_DT, ENC_CLK);
 
 //Motor Driver Pins (Using Mini L298 Motor Driver Board)
 #define MOT_IN1 8 // Agitate Motor 1
@@ -38,6 +42,7 @@ bool agitateDirectionFlag = true;
 
 //Menu option selection marker.
 int menu = 1;
+int buttonPressed = false;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -47,24 +52,31 @@ void setup() {
   pinMode(MOT_IN3, OUTPUT);
   pinMode(MOT_IN4, OUTPUT);
 
-  // Initialize UI Pins
+  // Initialize UI Pins.
   pinMode(BUZZER, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
 
-  pinMode(ENC_SW, INPUT);
+  // Initialize Encoder Button.
+  pinMode(ENC_SW, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(2), buttonStateChange, FALLING);
 
+  lcd.begin();
+  lcd.backlight();
+  encoder.write(menu);
+  updateMenu();
 
 }
 // the loop function runs over and over again forever
 void loop() {
-  if (encoder.read() > menu){
+  
+  if (encoder.read() > menu + 2){
     menu++;
     encoder.write(menu);
     updateMenu();
     delay(100);
   }
-  if (encoder.read() < menu){
+  if (encoder.read() < menu - 2){
     menu--;
     encoder.write(menu);
     updateMenu();
@@ -76,6 +88,7 @@ void loop() {
     encoder.write(menu);
     delay(100);
   }
+  delay(100);
 }
 
 // Agitate function controls the agitation motor.
@@ -133,30 +146,27 @@ void updateMenu( ){
     break;
   case 1:
     lcd.clear();
-    lcd.print(">Option 1");
+    lcd.print(TITLE);
     lcd.setCursor(0, 1);
-    lcd.print(" Option 2");
+    lcd.print(">C-41     B&W   ");
     break;
   case 2:
     lcd.clear();
-    lcd.print(" Option 1");
+    lcd.print(TITLE);
     lcd.setCursor(0, 1);
-    lcd.print(">Option 2");
+    lcd.print(" C-41    >B&W   ");
     break;
   case 3:
     lcd.clear();
-    lcd.print(">Option 3");
+    lcd.print(TITLE);
     lcd.setCursor(0, 1);
-    lcd.print(" Option 4");
+    lcd.print(">Custom   ");
     break;
   case 4:
-    lcd.clear();
-    lcd.print(" Option 3");
-    lcd.setCursor(0, 1);
-    lcd.print(">Option 4");
+    menu = 3;
     break;
-  case 5:
-    menu = 4;
+  default:
+    menu = 1;
     break;
   }
 }
@@ -164,23 +174,129 @@ void updateMenu( ){
 // Executes action selected via LCD & Encoder
 void executeAction() {
   switch (menu) {
-    case 1: //C-41 Standard
+    case 1: //C-41
+      colorDevelopment();
       //develop();
       //fix();
+      buzz(1);
       break;
-    case 2: //C-41 Push 1 Stop
+    case 2: //B&W
       //develop();
       //fix();
+      buzz(2);
       break;
-    case 3: // C-41 Push 2 Stops
-      //develop();
-      //fix();
-      break;
-    case 4: // C-41 Push 3 Stops
+    case 3: // Custom
       //develop();
       //fix();
       break;
   }
+}
+
+void colorDevelopment(){
+
+  lcd.clear();
+  lcd.print("C-41 Development");
+  delay(100);
+  bool flag = true;
+  int8_t pushPullValue = 0;
+  uint16_t duration = 0;
+  while (flag)
+  {
+
+    pushPullValue = encoder.read() / 4;
+    if (pushPullValue > 3)
+    {
+      pushPullValue = 3;
+      encoder.write(12); //3 * 4
+    } else if (pushPullValue < -1)
+    {
+      pushPullValue = -1;
+      encoder.write(-4);
+    }
+    
+    
+    lcd.setCursor(0, 1);
+    lcd.print(String("Push/Pull? ") + String(pushPullValue) + String(" stp"));
+    delay(100);
+    !digitalRead(ENC_SW)? flag = false : false;
+  }
+  flag = true;
+  buzz(abs(pushPullValue));
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+
+  switch (pushPullValue)
+  {
+  case 0:
+    duration = 210;
+    lcd.print("C-41, +0 Push");
+    break;
+  case 1:
+    duration = 273;
+    lcd.print("C-41, +1 Push");
+    break;
+  case 2:
+    duration = 368;
+    lcd.print("C-41, +2 Push");
+    break;
+  case 3:
+    duration = 525;
+    lcd.print("C-41, +3 Push");
+    break;
+  case -1:
+    duration = 165;
+    lcd.print("C-41, -1 Pull");
+  default:
+    break;
+  }
+
+  lcd.setCursor(0,1);
+  lcd.print("Hld btn to start");
+  delay(100);
+  while (flag)
+  {
+    digitalWrite(RED_LED, HIGH);  // turn the LED on (HIGH is the voltage level)
+    delay(500);                      // wait for a second
+    digitalWrite(RED_LED, LOW);   // turn the LED off by making the voltage LOW
+    delay(500); 
+    !digitalRead(ENC_SW)? flag = false : false;
+  }
+  flag = true;
+
+  lcd.clear();
+  lcd.print("Developing ...");
+  develop(duration, 10, 6, 30);
+
+  lcd.clear();
+  lcd.print("Development Finished.");
+  lcd.setCursor(0,1);
+  lcd.print("Hld btn to fix.");
+  while (flag)
+  {
+    buzz(1);
+    delay(100);
+    !digitalRead(ENC_SW)? flag = false : false;
+  }
+  flag = true;
+  lcd.print("Fixing ...");
+  fix(480);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Process Finished. ");
+  lcd.setCursor(0, 1);
+  lcd.print("Hld btn to cnfrm");
+
+
+  while (flag)
+  {
+    buzz(1);
+    delay(100);
+    !digitalRead(ENC_SW)? flag = false : false;
+  } flag = true;
+
+  encoder.write(menu);
 }
 
 //Develop function that handles the development process. all values as seconds
@@ -189,8 +305,9 @@ void develop(uint16_t devDuration,
               uint8_t agitationDuration, 
               uint16_t agitateEveryDuration){
   uint8_t totalCycles = (devDuration - firstAgitationDuration) / (agitationDuration + agitateEveryDuration);
-  uint8_t padding = (devDuration - firstAgitationDuration) % (agitationDuration + agitateEveryDuration);
-
+  uint8_t padding = (devDuration - firstAgitationDuration) % (agitationDuration + agitateEveryDuration);    
+    
+  digitalWrite(RED_LED, HIGH);
   agitate(firstAgitationDuration);
   vibrate();
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
@@ -205,12 +322,15 @@ void develop(uint16_t devDuration,
     buzz(5);
     
   }
+  digitalWrite(RED_LED, LOW);
+
   return;
 }
 
 //fix function handles the Fixing Step of the process. vales in seconds. 
 void fix(uint8_t fixingDuration){
   uint8_t totalCycles = fixingDuration * 2;
+  digitalWrite(RED_LED, HIGH);
   vibrate();
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
   {
@@ -218,6 +338,11 @@ void fix(uint8_t fixingDuration){
     delay(15 * 1000);
   }
   buzz(6);
+  digitalWrite(RED_LED, LOW);
   return;
   
+}
+
+void buttonStateChange(){
+  buttonPressed = true;
 }

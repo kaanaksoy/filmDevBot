@@ -19,6 +19,8 @@
                 "/Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino",
                 "/Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard",
                 "/Users/kaan/Documents/Arduino/libraries/Encoder",
+                "/Users/kaan/Documents/Arduino/libraries/LCD_I2C/src",
+                "/Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
                 "/Users/kaan/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include",
                 "/Users/kaan/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include-fixed",
                 "/Users/kaan/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include"
