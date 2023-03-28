@@ -6,8 +6,7 @@
 
   Automates your film development using AP Tanks. 
 
-last modified 25 March 2023
-  by Kaan Aksoy
+last modified by Kaan Aksoy
 
 */
 
