@@ -8,8 +8,7 @@
 
   Automates your film development using AP Tanks. 
 
-last modified 25 March 2023
-  by Kaan Aksoy
+last modified by Kaan Aksoy
 
 */
 
@@ -47,29 +46,29 @@ int menu = 1;
 int buttonPressed = false;
 
 // the setup function runs once when you press reset or power the board
-#line 48 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 47 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void setup();
-#line 71 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 70 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void loop();
-#line 95 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 94 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void agitate(int durationSeconds);
-#line 118 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 117 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void vibrate();
-#line 131 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 130 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void buzz(int repeatTimes);
-#line 141 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 140 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void updateMenu( );
-#line 175 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 174 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void executeAction();
-#line 195 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 194 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void colorDevelopment();
-#line 303 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 302 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void develop(uint16_t devDuration, uint8_t firstAgitationDuration, uint8_t agitationDuration, uint16_t agitateEveryDuration);
-#line 331 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 330 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void fix(uint8_t fixingDuration);
-#line 346 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 345 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void buttonStateChange();
-#line 48 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+#line 47 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void setup() {
   // initialize motor output pins.
   pinMode(MOT_IN1, OUTPUT);

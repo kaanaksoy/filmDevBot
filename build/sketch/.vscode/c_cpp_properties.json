@@ -536,6 +536,19 @@
                 "__BUILTIN_AVR_FMUL=1",
                 "USBCON"
             ]
+        },
+        {
+            "name": "Film Dev Bot",
+            "compilerPath": "",
+            "compilerArgs": [],
+            "intelliSenseMode": "macos-clang-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "defines": []
         }
     ]
 }

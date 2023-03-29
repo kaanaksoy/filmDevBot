@@ -12,14 +12,12 @@
 
 
 
-last modified 25 March 2023
-
-  by Kaan Aksoy
+last modified by Kaan Aksoy
 
 
 
 */
-# 14 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 13 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 /* ---- PIN DEFINITIONS ---- */
 
 LCD_I2C lcd(0x27); //Default LCD Address. Change for your module.
