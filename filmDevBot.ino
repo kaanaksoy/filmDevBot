@@ -1,14 +1,14 @@
-#define DEBUG // Uncomment to turn on debug statements.
+//#define DEBUG // Uncomment to turn on debug statements.
 #include <ArduinoTrace.h>
-#include "debugUtils.h"
-
-
 #include "CMBMenu.hpp"
-#include <Encoder.h>
 #include <LCD_I2C.h>
 
-#include "icons.h" //Icons for Menu Interface
-#include "filmDevHelpers.h" // Helper functions for film development
+#include "filmDevUtils.h" // Helper functions for film development
+#include "globals.h" // Global variables
+#include "encoderHelper.h"
+#include "debugUtils.h"
+#include "menuHelper.h"
+
 
 /*
   Film Development Bot
@@ -16,83 +16,19 @@
 */
 
 
-/* ---- DEFINITIONS ---- */
-
-
-// UI Pins
-#define BUZZER 5
-#define RED_LED 7
-
-//Encoder Pins 
-/* 
-  (Using Encoder Breakout Board with pullip resistors. 
-  If you dont have pullup resistors, you can enable the built in ones.
-*/
-#define ENC_CLK 2 // Encoder In B
-#define ENC_DT 3 // Encoder In A
-#define ENC_SW 4 // Encoder Button
-
-// Motor Driver Pins 
-// (Using Mini L298 Motor Driver Board)
-#define MOT_IN1 8 // Agitate Motor 1
-#define MOT_IN2 9 // Agitate Motor 2
-#define MOT_IN3 10 // Vibrate Motor 1
-#define MOT_IN4 11 // Vibrate Motor 2
-
-
-
-
-/* MENU Definitions */
-
-// Define menu options
-const char gMenuColor[] PROGMEM =    {"      Color     "};
-const char gMenuC41[] PROGMEM =      {"       C-41     "};
-const char gMenuE6[] PROGMEM =       {"       E-6      "};
-const char gMenuBW[] PROGMEM =       {"       B&W      "};
-const char gMenuBWCustom[] PROGMEM = {"      Custom    "};
-
-#define TITLE "  Film Dev Bot  " // Title Text
-
-// Define menu functionIDs
-enum MenuFID {
-  MenuColor,
-  MenuC41,
-  MenuE6,
-  MenuBW,
-  MenuBWCustom
-};
-
-// Define Encoder Navigation types
-enum EncoderInputType {
-  EncoderNone,
-  EncoderLeft,
-  EncoderRight,
-  EncoderEnter,
-  EncoderExit
-};
-
-//create menu instance
-CMBMenu<5> gMenu;
-
-// create LCD Instance
-LCD_I2C gLCD(0x27, 16, 2); //Default LCD Address. Change for your module.
-
-
-Encoder gEncoder(ENC_DT, ENC_CLK);
-int gEncoderPrevPos = 0;
-bool buttonActive = false;
-bool longPressActive = false;
-
-long buttonTimer = 0;
-long longPressTime = 500;
-
 // ------------ SETUP -------------
 void setup(){
 
+  
   #ifdef DEBUG
   Serial.begin(9600);
   #endif
 
+  gLCD.begin();
+  gLCD.backlight();
+
+  MenuUI::createMenu();
+  
   // Initialize motor control pins.
   pinMode(MOT_IN1, OUTPUT);
   pinMode(MOT_IN2, OUTPUT);
@@ -102,27 +38,10 @@ void setup(){
   // Initialize UI pins.
   pinMode(BUZZER, OUTPUT);
   pinMode(RED_LED, OUTPUT);
-
   // Initialize encoder button.
   pinMode(ENC_SW, INPUT);
 
-  gLCD.begin();
-  gLCD.backlight();
   
-  // Add Nodes to the menu
-  gMenu.addNode(0, gMenuColor, MenuColor);
-  gMenu.addNode(1, gMenuC41, MenuC41);
-  gMenu.addNode(1, gMenuE6, MenuE6);
-
-  gMenu.addNode(0, gMenuBW, MenuBW);
-  gMenu.addNode(1, gMenuBWCustom, MenuBWCustom);
-
-  // Build & Print Menu
-  const char* info;
-  gMenu.buildMenu(info);
-  gMenu.printMenu();
-  // Print Current Menu Entry
-  printMenuEntry(info);
 }
 
 // ------------ LOOP -------------
@@ -134,47 +53,47 @@ void loop(){
 
   bool layerChanged = false; // Should navigate layers?
 
-  EncoderInputType key = getKey(); // Determine pressed key.
+  EncoderInputType command = enc::getCommand(); // Determine pressed command.
 
-  // Call menu methods based on key selection
-  switch (key)
+  // Call menu methods based on command selection
+  switch (command)
   {
   case EncoderExit:
-    gMenu.exit();
+    MenuUI::gMenu.exit();
     break;
   case EncoderEnter:
-    gMenu.enter(layerChanged);
+    MenuUI::gMenu.enter(layerChanged);
     break;
   case EncoderLeft:
-    gMenu.left();
+    MenuUI::gMenu.left();
     break;
   case EncoderRight:
-    gMenu.right();
+    MenuUI::gMenu.right();
   default:
     break;
   }
 
   /* 
-    Print/update the menu when the key is pressed.
+    Print/update the menu when the command is pressed.
     get the current function ID.
   */
-  if (EncoderNone != key)
+  if (EncoderNone != command)
   {
-    fid = gMenu.getInfo(info);
-    printMenuEntry(info);
+    fid = MenuUI::gMenu.getInfo(info);
+    MenuUI::printMenuEntry(info);
   }
 
   // Do action regarding fid 
-  if ((0 != fid) && (EncoderEnter == key) && (!layerChanged)){
+  if ((0 != fid) && (EncoderEnter == command) && (!layerChanged)){
     switch (fid)
     {
-    case MenuC41:
+    case MenuUI::MenuC41:
       ColorC41();
       break;
-    case MenuE6:
+    case MenuUI::MenuE6:
       ColorE6();
       break;
-    case MenuBWCustom:
+    case MenuUI::MenuBWCustom:
       BWCustom();
       break;
     default:
@@ -197,8 +116,8 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType key = getKey(); // Determine pressed key.
-    switch (key)
+    EncoderInputType command = enc::getCommand(); // Determine pressed command.
+    switch (command)
     {
     case EncoderLeft:
       pushPullValue--;
@@ -256,7 +175,7 @@ void ColorC41(){
   }
 
   gLCD.setCursor(0,1);
-  gLCD.createChar(2, enterChar);
+  gLCD.createChar(2, UI_Icons::enterChar);
   gLCD.setCursor(3,1);
   gLCD.write(2);
   gLCD.setCursor(5, 1);
@@ -264,8 +183,8 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType key = getKey();
-    switch (key)
+    EncoderInputType command = enc::getCommand();
+    switch (command)
     {
     case EncoderEnter:
       confirmSelection = true;
@@ -281,12 +200,12 @@ void ColorC41(){
   
   gLCD.clear();
   gLCD.print("Developing...");
-  develop(duration, 10, 6, 30);
+  filmDevUtils::develop(duration, 10, 6, 30);
 
   gLCD.clear();
   gLCD.print("Development Finished");
   gLCD.setCursor(0,1);
-  gLCD.createChar(2, enterChar);
+  gLCD.createChar(2, UI_Icons::enterChar);
   gLCD.setCursor(3,1);
   gLCD.write(2);
   gLCD.setCursor(5, 1);
@@ -295,8 +214,8 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType key = getKey();
-    switch (key)
+    EncoderInputType command = enc::getCommand();
+    switch (command)
     {
     case EncoderEnter:
       confirmSelection = true;
@@ -311,13 +230,13 @@ void ColorC41(){
   confirmSelection = false;
 
   gLCD.print("Fixing...");
-  fix(480);
+  filmDevUtils::fix(480);
 
   gLCD.clear();
   gLCD.setCursor(0,0);
   gLCD.print("Process Finished");
-    gLCD.setCursor(0,1);
-  gLCD.createChar(2, enterChar);
+  gLCD.setCursor(0,1);
+  gLCD.createChar(2, UI_Icons::enterChar);
   gLCD.setCursor(3,1);
   gLCD.write(2);
   gLCD.setCursor(5, 1);
@@ -326,8 +245,8 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType key = getKey();
-    switch (key)
+    EncoderInputType command = enc::getCommand();
+    switch (command)
     {
     case EncoderEnter:
       confirmSelection = true;
@@ -351,138 +270,4 @@ void BWCustom(){
   return;
 }
 
-// --- printMenuEntry | Menu Functions ---
-void printMenuEntry(const char* funcInfo){
-  String infoStr;
-  MBHelper::stringFromPgm(funcInfo, infoStr);
 
-  gLCD.clear();
-  gLCD.setCursor(0,0);
-  gLCD.print(infoStr);
-
-  gLCD.createChar(1,leftArrowChar);
-  gLCD.setCursor(6, 1);
-  gLCD.write(1);
-
-  gLCD.createChar(2, enterChar);
-  gLCD.setCursor(8,1);
-  gLCD.write(2);
-
-  gLCD.createChar(3, rightArrowChar);
-  gLCD.setCursor(10,1);
-  gLCD.write(3);
-
-  gLCD.createChar(4, exitChar);
-  gLCD.setCursor(14,1);
-  gLCD.write(4);
-
-
-}
-
-// --- getKey | Menu Navigation Function ---
-EncoderInputType getKey(){
-  EncoderInputType key = EncoderNone;
-  
-
-
-  if (gEncoderPrevPos > gEncoder.read())
-  {
-    key = EncoderLeft;
-  } else if (gEncoderPrevPos < gEncoder.read())
-  {
-    key = EncoderRight;
-  } 
-  
-  if (digitalRead(ENC_SW) == LOW)
-  {
-    if (buttonActive == false)
-    {
-      buttonActive = true;
-      buttonTimer = millis();
-    }
-    if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
-    {
-      longPressActive = true;
-      key = EncoderExit;
-      delay(250);
-    }
-  } else
-  {
-    if (buttonActive == true)
-    {
-      if (longPressActive == true)
-      {
-        longPressActive = false; 
-      } else
-      {
-        key = EncoderEnter;
-        delay(100);
-      }
-      buttonActive = false;
-    }
-    
-  }
-  
-  gEncoderPrevPos = gEncoder.read();
-  return key;
-}
-
-
-
-/*
-  --- buzz | UI Helper Functions ---
-  Simple buzzer control, used to simplify code.
-*/
-void buzz(int repeatTimes){
-
-    tone(BUZZER, 4000, 125);
-  }
-
-/*
-  --- develop | Film Development Functions ---
-  Develop function that handles the development process.
-*/
-void develop(uint16_t devDurationSeconds, 
-              uint8_t firstAgitationDurationSeconds, 
-              uint8_t agitationDurationSeconds, 
-              uint16_t agitateEveryDurationSeconds){
-  uint8_t totalCycles = (devDurationSeconds - firstAgitationDurationSeconds) / (agitationDurationSeconds + agitateEveryDurationSeconds);
-  uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) % (agitationDurationSeconds + agitateEveryDurationSeconds);    
-    
-  digitalWrite(RED_LED, HIGH);
-  agitate(firstAgitationDurationSeconds, MOT_IN1, MOT_IN2);
-  vibrate(MOT_IN3, MOT_IN4);
-  for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
-  {
-    delay(agitateEveryDurationSeconds * 1000);
-    agitate(agitationDurationSeconds, MOT_IN1, MOT_IN2);
-    if (cycleCount + 2 >= totalCycles)
-    {
-      buzz(3);
-    }
-    delay(padding * 1000);
-    buzz(5);
-    
-  }
-  digitalWrite(RED_LED, LOW);
-
-  return;
-}
-/*
-  --- fix | Film Development Functions ---
-  fix function handles the Fixing Step of the process. vales in seconds. 
-  */
- void fix(uint8_t fixingDurationSeconds){
-  uint8_t totalCycles = fixingDurationSeconds * 2;
-  digitalWrite(RED_LED, HIGH);
-  vibrate(MOT_IN3, MOT_IN4);
-  for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
-  {
-    agitate(15, MOT_IN1, MOT_IN2);
-    delay(15 * 1000);
-  }
-  buzz(6);
-  digitalWrite(RED_LED, LOW);
-  return;
-  
-}
