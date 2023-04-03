@@ -1,8 +1,0 @@
-#line 1 "/Users/kaan/Documents/Arduino/filmDevBot/.vscode/arduino.json"
-{
-    "sketch": "filmDevBot.ino",
-    "output": "build",
-    "board": "arduino:avr:uno",
-    "port": "/dev/tty.usbmodem141201",
-    "programmer": "avrisp"
-}
