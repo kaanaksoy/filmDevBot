@@ -9,11 +9,12 @@
 
 namespace TempSensors
 {
+
     #define ONE_WIRE_BUS 6 // Data wire is plugged into port 6 on the Arduino
-    #define TANK_SENSOR_INDEX 0
     OneWire oneWire(ONE_WIRE_BUS); // Setup onewire instance for comms.
 
     DallasTemperature tempSensors(&oneWire);
+    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56};
 
     void initializeTempSensor(){
         tempSensors.begin();
@@ -23,7 +24,7 @@ namespace TempSensors
         DEBUG_PRINT("Requesting Temp");
         tempSensors.requestTemperatures();
         DEBUG_PRINT("Temp Received")
-        float tempC = tempSensors.getTempCByIndex(TANK_SENSOR_INDEX);
+        float tempC = tempSensors.getTempC(tankThermometer);
 
         if (tempC != DEVICE_DISCONNECTED_C)
         {

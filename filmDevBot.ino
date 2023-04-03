@@ -9,6 +9,7 @@
 #include "debugUtils.h"
 #include "menuHelper.h"
 #include "utilfuncs.h"
+#include "tempSensorHelper.h"
 
 
 /*
@@ -19,7 +20,7 @@
 
 // ------------ SETUP -------------
 void setup(){
-
+ 
   
   #ifdef DEBUG
   Serial.begin(9600);
@@ -47,60 +48,66 @@ void setup(){
 
 // ------------ LOOP -------------
 void loop(){
+
   int fid = 0; //Function ID
 
   // Info text from menu
   const char* info;
-
   bool layerChanged = false; // Should navigate layers?
 
-  EncoderInputType command = enc::getCommand(); // Determine pressed command.
+  enc::EncoderInputType command = enc::getCommand(); // Determine pressed command.
 
   // Call menu methods based on command selection
   switch (command)
   {
-  case EncoderExit:
+  case enc::EncoderExit:
     MenuUI::gMenu.exit();
     break;
-  case EncoderEnter:
+  case enc::EncoderEnter:
     MenuUI::gMenu.enter(layerChanged);
     break;
-  case EncoderLeft:
+  case enc::EncoderLeft:
     MenuUI::gMenu.left();
     break;
-  case EncoderRight:
+  case enc::EncoderRight:
     MenuUI::gMenu.right();
+  case enc::EncoderNone:
   default:
     break;
   }
 
   /* 
-    Print/update the menu when the command is pressed.
+    Print/update the menu when commanded.
     get the current function ID.
   */
-  if (EncoderNone != command)
+  if (enc::EncoderNone != command)
   {
     fid = MenuUI::gMenu.getInfo(info);
     MenuUI::printMenuEntry(info);
+
+    // Do action regarding fid 
+    if ((0 != fid) && (command == enc::EncoderEnter) && (!layerChanged)){
+      switch (fid)
+      {
+      case MenuUI::MenuC41:
+        ColorC41();
+        break;
+      case MenuUI::MenuE6:
+        ColorE6();
+        break;
+      case MenuUI::MenuBWCustom:
+        BWCustom();
+        break;
+      default:
+        break;
+      }
+    }
+
   }
 
-  // Do action regarding fid 
-  if ((0 != fid) && (EncoderEnter == command) && (!layerChanged)){
-    switch (fid)
-    {
-    case MenuUI::MenuC41:
-      ColorC41();
-      break;
-    case MenuUI::MenuE6:
-      ColorE6();
-      break;
-    case MenuUI::MenuBWCustom:
-      BWCustom();
-      break;
-    default:
-      break;
-    }
-  }
+  // Update Temperature reading.
+  MenuUI::printTempReadings(TempSensors::getTankTemp());
+
 }
 
 // --- ColorC41 | Film Development Functions ---
@@ -117,18 +124,18 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType command = enc::getCommand(); // Determine pressed command.
+    enc::EncoderInputType command = enc::getCommand(); // Determine pressed command.
     switch (command)
     {
-    case EncoderLeft:
+    case enc::EncoderLeft:
       pushPullValue--;
       break;
-    case EncoderRight:
+    case enc::EncoderRight:
       pushPullValue++;
       break;
-    case EncoderExit:
+    case enc::EncoderExit:
       return;
-    case EncoderEnter:
+    case enc::EncoderEnter:
       confirmSelection = true;
     default:
       break;
@@ -184,13 +191,13 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand();
     switch (command)
     {
-    case EncoderEnter:
+    case enc::EncoderEnter:
       confirmSelection = true;
       break;
-    case EncoderExit:
+    case enc::EncoderExit:
       return;
     default:
       break;
@@ -215,13 +222,13 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand();
     switch (command)
     {
-    case EncoderEnter:
+    case enc::EncoderEnter:
       confirmSelection = true;
       break;
-    case EncoderExit:
+    case enc::EncoderExit:
       return;
     default:
       break;
@@ -246,13 +253,13 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand();
     switch (command)
     {
-    case EncoderEnter:
+    case enc::EncoderEnter:
       confirmSelection = true;
       break;
-    case EncoderExit:
+    case enc::EncoderExit:
       return;
     default:
       break;

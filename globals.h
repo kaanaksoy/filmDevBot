@@ -16,14 +16,6 @@
 // create LCD Instance
 LCD_I2C gLCD(0x27, 16, 2); //Default LCD Address. Change for your module.
 
-enum EncoderInputType {
-EncoderNone,
-EncoderLeft,
-EncoderRight,
-EncoderEnter,
-EncoderExit
-};
-
 
 namespace UI_Icons
 {
@@ -70,4 +62,27 @@ namespace UI_Icons
     B10001,
     B00000
   };
+
+  const byte bathTempChar[] = {
+    B00010,
+    B00101,
+    B00010,
+    B11000,
+    B10100,
+    B11000,
+    B10100,
+    B11000
+  };
+
+  const byte tankTempChar[] = {
+    B00010,
+    B00101,
+    B00010,
+    B00000,
+    B11100,
+    B01000,
+    B01000,
+    B01000
+};
+
 } // namespace UI_Icons

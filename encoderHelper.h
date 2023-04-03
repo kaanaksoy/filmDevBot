@@ -5,6 +5,7 @@
 #include "utilfuncs.h"
 
 //Libraries
+#define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h> 
 
 namespace enc
@@ -17,15 +18,19 @@ namespace enc
     #define ENC_CLK 2 // Encoder In B
     #define ENC_DT 3 // Encoder In A
     #define ENC_SW 4 // Encoder Button
+    #define LONG_PRESS_DUR 350
+
+    //int gEncoderPrevPos = 0;
+
+    enum EncoderInputType {
+        EncoderNone,
+        EncoderLeft,
+        EncoderRight,
+        EncoderEnter,
+        EncoderExit
+    };
 
 
-
-    int gEncoderPrevPos = 0;
-    bool buttonActive = false;
-    bool longPressActive = false;
-
-    long buttonTimer = 0;
-    long longPressTime = 500;
 
     // Define Encoder Navigation types
 
@@ -34,51 +39,67 @@ namespace enc
 
     // --- getCommand | Menu Navigation Function ---
     EncoderInputType getCommand(){
-    EncoderInputType command = EncoderNone;
-    unsigned long timeNow;
+        EncoderInputType command = EncoderNone;
+        unsigned long timeNow;
+        //bool buttonPressed = false;
+        //bool longPressActive = false;
+        unsigned long buttonTimer = 0;
 
-
-    if (gEncoderPrevPos > gEncoder.read())
-    {
-        command = EncoderLeft;
-    } else if (gEncoderPrevPos < gEncoder.read())
-    {
-        command = EncoderRight;
-    } 
-    
-    if (digitalRead(ENC_SW) == LOW)
-    {
-        if (buttonActive == false)
+        int gEncoderCurrPos = gEncoder.readAndReset();
+        // if (digitalRead(ENC_SW) == LOW)
+        // {
+        //     if (buttonPressed == false)
+        //     {
+        //     buttonPressed = true;
+        //     buttonTimer = millis();
+        //     }
+        //     if ((millis() - buttonTimer > LONG_PRESS_DUR) && (!longPressActive))
+        //     {
+        //         timeNow = millis();
+        //         longPressActive = true;
+        //         Utils::millisDelay(timeNow, 250);
+        //         return EncoderExit;
+        //     }
+        // } else
+        // {
+        //     if (buttonPressed == true)
+        //     {
+        //         if (longPressActive == true)
+        //         {   
+        //             longPressActive = false; 
+        //         } else
+        //         {
+        //             timeNow = millis();
+        //             Utils::millisDelay(timeNow, 100);
+        //             return EncoderEnter;
+        //         }
+        //         buttonPressed = false;
+        //     }
+            
+        // }
+        if (digitalRead(ENC_SW) == LOW)
         {
-        buttonActive = true;
-        buttonTimer = millis();
-        }
-        if ((millis() - buttonTimer > longPressTime) && (!longPressActive))
-        {
-            timeNow = millis();
-            longPressActive = true;
-            command = EncoderExit;
-            Utils::millisDelay(timeNow, 250);
-        }
-    } else
-    {
-        if (buttonActive == true)
-        {
-        if (longPressActive == true)
-        {   
-            longPressActive = false; 
-        } else
-        {
-            timeNow = millis();
+            buttonTimer = millis();
+            while (digitalRead(ENC_SW) == LOW)
+            {
+                if (millis() - buttonTimer > LONG_PRESS_DUR)
+                {
+                    command = EncoderExit;
+                    return command;
+                }              
+                
+            }
             command = EncoderEnter;
-            Utils::millisDelay(timeNow, 100);
-        }
-        buttonActive = false;
         }
         
-    }
-    
-    gEncoderPrevPos = gEncoder.read();
-    return command;
+
+        if (0 > gEncoderCurrPos+1)
+        {
+            command = EncoderLeft;
+        } else if (0 < gEncoderCurrPos-1)
+        {
+            command = EncoderRight;
+        }        
+        return command;
     }
 } // namespace enc
