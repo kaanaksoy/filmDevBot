@@ -8,6 +8,7 @@
 #include "encoderHelper.h"
 #include "debugUtils.h"
 #include "menuHelper.h"
+#include "utilfuncs.h"
 
 
 /*
@@ -145,8 +146,8 @@ void ColorC41(){
     delay(150);
   }
   confirmSelection = false;
-  buzz(abs(pushPullValue));
-  gLCD.clear();
+  Utils::buzz(abs(pushPullValue));
+  gLCD.clear(); 
   gLCD.setCursor(0,0);
 
   switch (pushPullValue)
@@ -194,7 +195,7 @@ void ColorC41(){
     default:
       break;
     }
-    buzz(1);
+    Utils::buzz(1);
   }
   confirmSelection = false;
   
@@ -225,7 +226,7 @@ void ColorC41(){
     default:
       break;
     }
-    buzz(1);
+    Utils::buzz(1);
   }
   confirmSelection = false;
 
@@ -256,7 +257,7 @@ void ColorC41(){
     default:
       break;
     }
-    buzz(1);
+    Utils::buzz(1);
   }
   confirmSelection = false;
   return;

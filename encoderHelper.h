@@ -2,9 +2,10 @@
 
 //Header Files
 #include "globals.h"
+#include "utilfuncs.h"
 
 //Libraries
-#include <Encoder.h>
+#include <Encoder.h> 
 
 namespace enc
 {
@@ -17,7 +18,7 @@ namespace enc
     #define ENC_DT 3 // Encoder In A
     #define ENC_SW 4 // Encoder Button
 
-    
+
 
     int gEncoderPrevPos = 0;
     bool buttonActive = false;
@@ -34,7 +35,7 @@ namespace enc
     // --- getCommand | Menu Navigation Function ---
     EncoderInputType getCommand(){
     EncoderInputType command = EncoderNone;
-    
+    unsigned long timeNow;
 
 
     if (gEncoderPrevPos > gEncoder.read())
@@ -54,9 +55,10 @@ namespace enc
         }
         if ((millis() - buttonTimer > longPressTime) && (!longPressActive))
         {
-        longPressActive = true;
-        command = EncoderExit;
-        delay(250);
+            timeNow = millis();
+            longPressActive = true;
+            command = EncoderExit;
+            Utils::millisDelay(timeNow, 250);
         }
     } else
     {
@@ -67,8 +69,9 @@ namespace enc
             longPressActive = false; 
         } else
         {
+            timeNow = millis();
             command = EncoderEnter;
-            delay(100);
+            Utils::millisDelay(timeNow, 100);
         }
         buttonActive = false;
         }

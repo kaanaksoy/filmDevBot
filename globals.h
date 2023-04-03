@@ -24,14 +24,6 @@ EncoderEnter,
 EncoderExit
 };
 
-/*
-  --- buzz | UI Helper Functions ---
-  Simple buzzer control, used to simplify code.
-*/
-void buzz(int repeatTimes){
-
-    tone(BUZZER, 4000, 125);
-}
 
 namespace UI_Icons
 {
