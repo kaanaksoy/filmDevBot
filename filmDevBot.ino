@@ -23,9 +23,9 @@ last modified by Kaan Aksoy
   (Using Encoder Breakout Board with pullip resistors. 
   If you dont have pullup resistors, you can enable the built in ones.
 */
-#define ENC_SW 2 // Encoder Button
+#define ENC_SW 4 // Encoder Button
 #define ENC_DT 3 // Encoder In A
-#define ENC_CLK 4 // Encoder In B
+#define ENC_CLK 2 // Encoder In B
 
 // Motor Driver Pins 
 // (Using Mini L298 Motor Driver Board)
