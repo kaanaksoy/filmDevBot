@@ -11,6 +11,11 @@
   },
   {
     "Sourcefile": "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp",
+    "Include": "ArduinoTrace.h",
+    "Includepath": "/Users/kaan/Documents/Arduino/libraries/ArduinoTrace"
+  },
+  {
+    "Sourcefile": "/Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevBot.ino.cpp",
     "Include": "CMBMenu.hpp",
     "Includepath": "/Users/kaan/Documents/Arduino/libraries/mbLib/src"
   },

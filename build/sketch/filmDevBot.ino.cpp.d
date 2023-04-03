@@ -11,10 +11,14 @@
  /Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino/USBAPI.h \
  /Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino/Arduino.h \
  /Users/kaan/Library/Arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard/pins_arduino.h \
+ /Users/kaan/Documents/Arduino/libraries/ArduinoTrace/ArduinoTrace.h \
+ /Users/kaan/Documents/Arduino/filmDevBot/build/sketch/debugUtils.h \
  /Users/kaan/Documents/Arduino/libraries/mbLib/src/CMBMenu.hpp \
  /Users/kaan/Documents/Arduino/libraries/mbLib/src/CMBMenuNode.hpp \
  /Users/kaan/Documents/Arduino/libraries/mbLib/src/MBHelper.hpp \
  /Users/kaan/Documents/Arduino/libraries/Encoder/Encoder.h \
  /Users/kaan/Documents/Arduino/libraries/Encoder/utility/direct_pin_read.h \
  /Users/kaan/Documents/Arduino/libraries/Encoder/utility/interrupt_pins.h \
- /Users/kaan/Documents/Arduino/libraries/LCD_I2C/src/LCD_I2C.h
+ /Users/kaan/Documents/Arduino/libraries/LCD_I2C/src/LCD_I2C.h \
+ /Users/kaan/Documents/Arduino/filmDevBot/build/sketch/icons.h \
+ /Users/kaan/Documents/Arduino/filmDevBot/build/sketch/filmDevHelpers.h

@@ -1,15 +1,20 @@
+#define DEBUG // Uncomment to turn on debug statements.
+#include <ArduinoTrace.h>
+#include "debugUtils.h"
+
+
 #include "CMBMenu.hpp"
 #include <Encoder.h>
 #include <LCD_I2C.h>
 
+#include "icons.h" //Icons for Menu Interface
+#include "filmDevHelpers.h" // Helper functions for film development
+
 /*
   Film Development Bot
-
-  Automates your film development using AP Tanks. 
-
-last modified by Kaan Aksoy
-
+  - Automates your film development using AP Tanks. 
 */
+
 
 /* ---- DEFINITIONS ---- */
 
@@ -23,9 +28,9 @@ last modified by Kaan Aksoy
   (Using Encoder Breakout Board with pullip resistors. 
   If you dont have pullup resistors, you can enable the built in ones.
 */
-#define ENC_SW 4 // Encoder Button
-#define ENC_DT 3 // Encoder In A
 #define ENC_CLK 2 // Encoder In B
+#define ENC_DT 3 // Encoder In A
+#define ENC_SW 4 // Encoder Button
 
 // Motor Driver Pins 
 // (Using Mini L298 Motor Driver Board)
@@ -34,8 +39,8 @@ last modified by Kaan Aksoy
 #define MOT_IN3 10 // Vibrate Motor 1
 #define MOT_IN4 11 // Vibrate Motor 2
 
-//Flag used to switch motor direction on every agitation.
-bool agitateDirectionFlag = true;
+
+
 
 /* MENU Definitions */
 
@@ -47,50 +52,6 @@ const char gMenuBW[] PROGMEM =       {"       B&W      "};
 const char gMenuBWCustom[] PROGMEM = {"      Custom    "};
 
 #define TITLE "  Film Dev Bot  " // Title Text
-// Define menu custom chars
-const byte leftArrowChar[] = {
-  B00000,
-  B00010,
-  B00110,
-  B01111,
-  B11111,
-  B01111,
-  B00110,
-  B00010
-};
-
-const byte rightArrowChar[] = {
-  B00000,
-  B01000,
-  B01100,
-  B11110,
-  B11111,
-  B11110,
-  B01100,
-  B01000
-};
-
-const byte enterChar[] = {
-  B00001,
-  B00001,
-  B00001,
-  B00101,
-  B01101,
-  B11111,
-  B01100,
-  B00100
-};
-
-const byte exitChar[] = {
-  B00000,
-  B00000,
-  B10001,
-  B01010,
-  B00100,
-  B01010,
-  B10001,
-  B00000
-};
 
 // Define menu functionIDs
 enum MenuFID {
@@ -127,6 +88,10 @@ long longPressTime = 500;
 
 // ------------ SETUP -------------
 void setup(){
+
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
 
   // Initialize motor control pins.
   pinMode(MOT_IN1, OUTPUT);
@@ -216,82 +181,6 @@ void loop(){
       break;
     }
   }
-}
-
-// --- printMenuEntry | Menu Functions ---
-void printMenuEntry(const char* funcInfo){
-  String infoStr;
-  MBHelper::stringFromPgm(funcInfo, infoStr);
-
-  gLCD.clear();
-  gLCD.setCursor(0,0);
-  gLCD.print(infoStr);
-
-  gLCD.createChar(1,leftArrowChar);
-  gLCD.setCursor(6, 1);
-  gLCD.write(1);
-
-  gLCD.createChar(2, enterChar);
-  gLCD.setCursor(8,1);
-  gLCD.write(2);
-
-  gLCD.createChar(3, rightArrowChar);
-  gLCD.setCursor(10,1);
-  gLCD.write(3);
-
-  gLCD.createChar(4, exitChar);
-  gLCD.setCursor(14,1);
-  gLCD.write(4);
-
-
-}
-
-// --- getKey | Menu Navigation Function ---
-EncoderInputType getKey(){
-  EncoderInputType key = EncoderNone;
-  
-
-
-  if (gEncoderPrevPos > gEncoder.read())
-  {
-    key = EncoderLeft;
-  } else if (gEncoderPrevPos < gEncoder.read())
-  {
-    key = EncoderRight;
-  } 
-  
-  if (digitalRead(ENC_SW) == LOW)
-  {
-    if (buttonActive == false)
-    {
-      buttonActive = true;
-      buttonTimer = millis();
-    }
-    if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
-    {
-      longPressActive = true;
-      key = EncoderExit;
-      delay(250);
-    }
-  } else
-  {
-    if (buttonActive == true)
-    {
-      if (longPressActive == true)
-      {
-        longPressActive = false; 
-      } else
-      {
-        key = EncoderEnter;
-        delay(100);
-      }
-      buttonActive = false;
-    }
-    
-  }
-  
-  gEncoderPrevPos = gEncoder.read();
-  return key;
 }
 
 // --- ColorC41 | Film Development Functions ---
@@ -462,53 +351,83 @@ void BWCustom(){
   return;
 }
 
-/*
-  --- agitate | Film Development Helper Functions ---
-  
-  Runs the agitate motor for the amount of time provided, 
-  each time in a different direction.
-*/
-void agitate(int durationSeconds){
-  switch (agitateDirectionFlag)
-  {
-  case true:
-    analogWrite(MOT_IN1, 255);
-    analogWrite(MOT_IN2, 0);
-    delay(durationSeconds * 1000);
+// --- printMenuEntry | Menu Functions ---
+void printMenuEntry(const char* funcInfo){
+  String infoStr;
+  MBHelper::stringFromPgm(funcInfo, infoStr);
 
-    agitateDirectionFlag = false;
-    break;
-  case false:
-  default:
-    analogWrite(MOT_IN1, 0);
-    analogWrite(MOT_IN2, 255);
-    delay(durationSeconds * 1000);
-    agitateDirectionFlag = true;
-    break;
-  }
+  gLCD.clear();
+  gLCD.setCursor(0,0);
+  gLCD.print(infoStr);
 
-  analogWrite(MOT_IN1, 0);
-  analogWrite(MOT_IN2, 0);
-  
-  return;
+  gLCD.createChar(1,leftArrowChar);
+  gLCD.setCursor(6, 1);
+  gLCD.write(1);
+
+  gLCD.createChar(2, enterChar);
+  gLCD.setCursor(8,1);
+  gLCD.write(2);
+
+  gLCD.createChar(3, rightArrowChar);
+  gLCD.setCursor(10,1);
+  gLCD.write(3);
+
+  gLCD.createChar(4, exitChar);
+  gLCD.setCursor(14,1);
+  gLCD.write(4);
+
+
 }
 
-/*
-  --- vibrate | Film Development Helper Functions ---
-  Simple vibrate function, used to release air bubbles from the emulsion surface.
-*/
-void vibrate(){
-  for (int i = 0; i < 4; i++)
+// --- getKey | Menu Navigation Function ---
+EncoderInputType getKey(){
+  EncoderInputType key = EncoderNone;
+  
+
+
+  if (gEncoderPrevPos > gEncoder.read())
   {
-  analogWrite(MOT_IN3, 255);
-  analogWrite(MOT_IN4, 0);
-  delay(1000);
-  analogWrite(MOT_IN3, 0);
-  analogWrite(MOT_IN4, 0);
-  delay(500);
+    key = EncoderLeft;
+  } else if (gEncoderPrevPos < gEncoder.read())
+  {
+    key = EncoderRight;
+  } 
+  
+  if (digitalRead(ENC_SW) == LOW)
+  {
+    if (buttonActive == false)
+    {
+      buttonActive = true;
+      buttonTimer = millis();
+    }
+    if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
+    {
+      longPressActive = true;
+      key = EncoderExit;
+      delay(250);
+    }
+  } else
+  {
+    if (buttonActive == true)
+    {
+      if (longPressActive == true)
+      {
+        longPressActive = false; 
+      } else
+      {
+        key = EncoderEnter;
+        delay(100);
+      }
+      buttonActive = false;
+    }
+    
   }
-  return;
+  
+  gEncoderPrevPos = gEncoder.read();
+  return key;
 }
+
+
 
 /*
   --- buzz | UI Helper Functions ---
@@ -531,12 +450,12 @@ void develop(uint16_t devDurationSeconds,
   uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) % (agitationDurationSeconds + agitateEveryDurationSeconds);    
     
   digitalWrite(RED_LED, HIGH);
-  agitate(firstAgitationDurationSeconds);
-  vibrate();
+  agitate(firstAgitationDurationSeconds, MOT_IN1, MOT_IN2);
+  vibrate(MOT_IN3, MOT_IN4);
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
   {
     delay(agitateEveryDurationSeconds * 1000);
-    agitate(agitationDurationSeconds);
+    agitate(agitationDurationSeconds, MOT_IN1, MOT_IN2);
     if (cycleCount + 2 >= totalCycles)
     {
       buzz(3);
@@ -556,10 +475,10 @@ void develop(uint16_t devDurationSeconds,
  void fix(uint8_t fixingDurationSeconds){
   uint8_t totalCycles = fixingDurationSeconds * 2;
   digitalWrite(RED_LED, HIGH);
-  vibrate();
+  vibrate(MOT_IN3, MOT_IN4);
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
   {
-    agitate(15);
+    agitate(15, MOT_IN1, MOT_IN2);
     delay(15 * 1000);
   }
   buzz(6);

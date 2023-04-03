@@ -1,24 +1,24 @@
 # 1 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
-# 2 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+
 # 3 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
 # 4 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+
+
+# 7 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+# 8 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+# 9 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+
+# 11 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
+# 12 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 2
 
 /*
 
   Film Development Bot
 
-
-
-  Automates your film development using AP Tanks. 
-
-
-
-last modified by Kaan Aksoy
-
-
+  - Automates your film development using AP Tanks. 
 
 */
-# 14 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 19 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 /* ---- DEFINITIONS ---- */
 
 
@@ -37,88 +37,37 @@ last modified by Kaan Aksoy
 
 // Motor Driver Pins 
 // (Using Mini L298 Motor Driver Board)
-
-
-
-
-
-//Flag used to switch motor direction on every agitation.
-bool agitateDirectionFlag = true;
-
+# 45 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 /* MENU Definitions */
 
 // Define menu options
 const char gMenuColor[] 
-# 43 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
+# 48 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
                        __attribute__((__progmem__)) 
-# 43 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 48 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
                                = {"      Color     "};
 const char gMenuC41[] 
-# 44 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
+# 49 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
                      __attribute__((__progmem__)) 
-# 44 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 49 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
                              = {"       C-41     "};
 const char gMenuE6[] 
-# 45 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
+# 50 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
                     __attribute__((__progmem__)) 
-# 45 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 50 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
                             = {"       E-6      "};
 const char gMenuBW[] 
-# 46 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
+# 51 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
                     __attribute__((__progmem__)) 
-# 46 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 51 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
                             = {"       B&W      "};
 const char gMenuBWCustom[] 
-# 47 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
+# 52 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino" 3
                           __attribute__((__progmem__)) 
-# 47 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 52 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
                                   = {"      Custom    "};
 
 
-// Define menu custom chars
-const byte leftArrowChar[] = {
-  0,
-  2,
-  6,
-  15,
-  31,
-  15,
-  6,
-  2
-};
-
-const byte rightArrowChar[] = {
-  0,
-  8,
-  12,
-  30,
-  31,
-  30,
-  12,
-  8
-};
-
-const byte enterChar[] = {
-  1,
-  1,
-  1,
-  5,
-  13,
-  31,
-  12,
-  4
-};
-
-const byte exitChar[] = {
-  0,
-  0,
-  17,
-  10,
-  4,
-  10,
-  17,
-  0
-};
 
 // Define menu functionIDs
 enum MenuFID {
@@ -155,6 +104,10 @@ long longPressTime = 500;
 
 // ------------ SETUP -------------
 void setup(){
+
+
+  Serial.begin(9600);
+
 
   // Initialize motor control pins.
   pinMode(8 /* Agitate Motor 1*/, 0x1);
@@ -224,7 +177,7 @@ void loop(){
     get the current function ID.
 
   */
-# 196 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 161 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
   if (EncoderNone != key)
   {
     fid = gMenu.getInfo(info);
@@ -496,70 +449,12 @@ void BWCustom(){
 
 /*
 
-  --- agitate | Film Development Helper Functions ---
-
-  
-
-  Runs the agitate motor for the amount of time provided, 
-
-  each time in a different direction.
-
-*/
-# 471 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
-void agitate(int durationSeconds){
-  switch (agitateDirectionFlag)
-  {
-  case true:
-    analogWrite(8 /* Agitate Motor 1*/, 255);
-    analogWrite(9 /* Agitate Motor 2*/, 0);
-    delay(durationSeconds * 1000);
-
-    agitateDirectionFlag = false;
-    break;
-  case false:
-  default:
-    analogWrite(8 /* Agitate Motor 1*/, 0);
-    analogWrite(9 /* Agitate Motor 2*/, 255);
-    delay(durationSeconds * 1000);
-    agitateDirectionFlag = true;
-    break;
-  }
-
-  analogWrite(8 /* Agitate Motor 1*/, 0);
-  analogWrite(9 /* Agitate Motor 2*/, 0);
-
-  return;
-}
-
-/*
-
-  --- vibrate | Film Development Helper Functions ---
-
-  Simple vibrate function, used to release air bubbles from the emulsion surface.
-
-*/
-# 500 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
-void vibrate(){
-  for (int i = 0; i < 4; i++)
-  {
-  analogWrite(10 /* Vibrate Motor 1*/, 255);
-  analogWrite(11 /* Vibrate Motor 2*/, 0);
-  delay(1000);
-  analogWrite(10 /* Vibrate Motor 1*/, 0);
-  analogWrite(11 /* Vibrate Motor 2*/, 0);
-  delay(500);
-  }
-  return;
-}
-
-/*
-
   --- buzz | UI Helper Functions ---
 
   Simple buzzer control, used to simplify code.
 
 */
-# 517 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 434 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void buzz(int repeatTimes){
 
     tone(5, 4000, 125);
@@ -572,7 +467,7 @@ void buzz(int repeatTimes){
   Develop function that handles the development process.
 
 */
-# 526 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 443 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
 void develop(uint16_t devDurationSeconds,
               uint8_t firstAgitationDurationSeconds,
               uint8_t agitationDurationSeconds,
@@ -581,12 +476,12 @@ void develop(uint16_t devDurationSeconds,
   uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) % (agitationDurationSeconds + agitateEveryDurationSeconds);
 
   digitalWrite(7, 0x1);
-  agitate(firstAgitationDurationSeconds);
-  vibrate();
+  agitate(firstAgitationDurationSeconds, 8 /* Agitate Motor 1*/, 9 /* Agitate Motor 2*/);
+  vibrate(10 /* Vibrate Motor 1*/, 11 /* Vibrate Motor 2*/);
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
   {
     delay(agitateEveryDurationSeconds * 1000);
-    agitate(agitationDurationSeconds);
+    agitate(agitationDurationSeconds, 8 /* Agitate Motor 1*/, 9 /* Agitate Motor 2*/);
     if (cycleCount + 2 >= totalCycles)
     {
       buzz(3);
@@ -606,14 +501,14 @@ void develop(uint16_t devDurationSeconds,
   fix function handles the Fixing Step of the process. vales in seconds. 
 
   */
-# 556 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
+# 473 "/Users/kaan/Documents/Arduino/filmDevBot/filmDevBot.ino"
  void fix(uint8_t fixingDurationSeconds){
   uint8_t totalCycles = fixingDurationSeconds * 2;
   digitalWrite(7, 0x1);
-  vibrate();
+  vibrate(10 /* Vibrate Motor 1*/, 11 /* Vibrate Motor 2*/);
   for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
   {
-    agitate(15);
+    agitate(15, 8 /* Agitate Motor 1*/, 9 /* Agitate Motor 2*/);
     delay(15 * 1000);
   }
   buzz(6);
