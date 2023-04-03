@@ -4,8 +4,9 @@
 #include "globals.h"
 #include "utilfuncs.h"
 
-//Libraries
 #define ENCODER_OPTIMIZE_INTERRUPTS
+
+//Libraries
 #include <Encoder.h> 
 
 namespace enc
@@ -18,10 +19,9 @@ namespace enc
     #define ENC_CLK 2 // Encoder In B
     #define ENC_DT 3 // Encoder In A
     #define ENC_SW 4 // Encoder Button
-    #define LONG_PRESS_DUR 350
+    #define LONG_PRESS_DUR 250
 
-    //int gEncoderPrevPos = 0;
-
+    // Define Encoder Navigation types
     enum EncoderInputType {
         EncoderNone,
         EncoderLeft,
@@ -30,59 +30,19 @@ namespace enc
         EncoderExit
     };
 
-
-
-    // Define Encoder Navigation types
-
-
-    Encoder gEncoder(ENC_DT, ENC_CLK);
+    Encoder gEncoder(ENC_DT, ENC_CLK); //Initialize Encoder
 
     // --- getCommand | Menu Navigation Function ---
     EncoderInputType getCommand(){
         EncoderInputType command = EncoderNone;
         unsigned long timeNow;
-        //bool buttonPressed = false;
-        //bool longPressActive = false;
-        unsigned long buttonTimer = 0;
 
-        int gEncoderCurrPos = gEncoder.readAndReset();
-        // if (digitalRead(ENC_SW) == LOW)
-        // {
-        //     if (buttonPressed == false)
-        //     {
-        //     buttonPressed = true;
-        //     buttonTimer = millis();
-        //     }
-        //     if ((millis() - buttonTimer > LONG_PRESS_DUR) && (!longPressActive))
-        //     {
-        //         timeNow = millis();
-        //         longPressActive = true;
-        //         Utils::millisDelay(timeNow, 250);
-        //         return EncoderExit;
-        //     }
-        // } else
-        // {
-        //     if (buttonPressed == true)
-        //     {
-        //         if (longPressActive == true)
-        //         {   
-        //             longPressActive = false; 
-        //         } else
-        //         {
-        //             timeNow = millis();
-        //             Utils::millisDelay(timeNow, 100);
-        //             return EncoderEnter;
-        //         }
-        //         buttonPressed = false;
-        //     }
-            
-        // }
         if (digitalRead(ENC_SW) == LOW)
         {
-            buttonTimer = millis();
+            timeNow = millis();
             while (digitalRead(ENC_SW) == LOW)
             {
-                if (millis() - buttonTimer > LONG_PRESS_DUR)
+                if (millis() - timeNow > LONG_PRESS_DUR)
                 {
                     command = EncoderExit;
                     return command;
@@ -90,8 +50,10 @@ namespace enc
                 
             }
             command = EncoderEnter;
+            return command;
         }
         
+        int gEncoderCurrPos = gEncoder.readAndReset();
 
         if (0 > gEncoderCurrPos+1)
         {
