@@ -4,8 +4,16 @@
 #include "globals.h"
 #include "tempSensorHelper.h"
 
+#define LEFT_ARR_ICON_ADDR 1
+#define ENTER_ICON_ADDR 2
+#define RIGHT_ARR_ICON_ADDR 3
+#define EXIT_ICON_ADDR 4
+#define TANK_TEMP_ICON_ADDR 5
+
+LCD_I2C gLCD(LCD_ADDR, 16, 2); 
 namespace MenuUI
 {
+    // create LCD Instance
     
     // Define menu options
     const char gMenuColor[] PROGMEM =    {"  Color    "};
@@ -26,16 +34,24 @@ namespace MenuUI
     //create menu instance
     CMBMenu<5> gMenu;
 
-    void printTempReadings(float tankTemp, float bathTemp = -1){
+    void initCustomChars(){
+        gLCD.createChar(LEFT_ARR_ICON_ADDR, UI_Icons::leftArrowChar);
+        gLCD.createChar(ENTER_ICON_ADDR, UI_Icons::enterChar);
+        gLCD.createChar(RIGHT_ARR_ICON_ADDR, UI_Icons::rightArrowChar);
+        gLCD.createChar(EXIT_ICON_ADDR, UI_Icons::exitChar);
+        gLCD.createChar(TANK_TEMP_ICON_ADDR, UI_Icons::tankTempChar);
+    }
 
-        //Print Tank Temp
+    void initLCD(){
+        gLCD.begin();
+        gLCD.backlight();
+    }
+
+    void printTempReadings(float tankTemp){
+        
+        if (tankTemp == SENSOR_NOT_READY) return;
         gLCD.setCursor(12, 1);
         gLCD.print(tankTemp);
-
-        if (bathTemp != -1)
-        {
-            //Print Bath Temp
-        }
         
     }
 
@@ -50,25 +66,16 @@ namespace MenuUI
     gLCD.print(infoStr);
 
     //Print navigation UI
-    gLCD.createChar(1, UI_Icons::leftArrowChar);
     gLCD.setCursor(2, 1);
-    gLCD.write(1);
-
-    gLCD.createChar(2, UI_Icons::enterChar);
+    gLCD.write(LEFT_ARR_ICON_ADDR);
     gLCD.setCursor(4,1);
-    gLCD.write(2);
-
-    gLCD.createChar(3, UI_Icons::rightArrowChar);
+    gLCD.write(ENTER_ICON_ADDR);
     gLCD.setCursor(6,1);
-    gLCD.write(3);
-
-    gLCD.createChar(4, UI_Icons::exitChar);
+    gLCD.write(RIGHT_ARR_ICON_ADDR);
     gLCD.setCursor(8,1);
-    gLCD.write(4);
-
-    gLCD.createChar(5, UI_Icons::tankTempChar);
+    gLCD.write(EXIT_ICON_ADDR);
     gLCD.setCursor(11, 1);
-    gLCD.write(5);
+    gLCD.write(TANK_TEMP_ICON_ADDR);
 
     printTempReadings(TempSensors::getTankTemp());
     }
@@ -82,6 +89,7 @@ namespace MenuUI
         gMenu.addNode(0, gMenuBW, MenuBW);
         gMenu.addNode(1, gMenuBWCustom, MenuBWCustom);
 
+        initCustomChars();
         // Build & Print Menu
         const char* info;
         gMenu.buildMenu(info);

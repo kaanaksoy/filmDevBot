@@ -16,7 +16,9 @@
   Film Development Bot
   - Automates your film development using AP Tanks. 
 */
-
+unsigned long timeEncoderPolled = millis();
+enc::EncoderInputType command = enc::EncoderNone;
+enc::EncoderInputType prevCommand;
 
 // ------------ SETUP -------------
 void setup(){
@@ -26,10 +28,10 @@ void setup(){
   Serial.begin(9600);
   #endif
 
-  gLCD.begin();
-  gLCD.backlight();
 
+  MenuUI::initLCD();
   MenuUI::createMenu();
+  TempSensors::initializeTempSensor();
   
   // Initialize motor control pins.
   pinMode(MOT_IN1, OUTPUT);
@@ -55,7 +57,16 @@ void loop(){
   const char* info;
   bool layerChanged = false; // Should navigate layers?
 
-  enc::EncoderInputType command = enc::getCommand(); // Determine pressed command.
+  enc::EncoderInputType command = enc::getCommand(command);
+  if (command == enc::EncoderExit) delay(400);
+
+  // if (millis() - timeEncoderPolled > 200)
+  // {
+  //   timeEncoderPolled = millis();
+  //    // Determine pressed command.
+    
+  // }
+  
 
   // Call menu methods based on command selection
   switch (command)
@@ -102,11 +113,11 @@ void loop(){
         break;
       }
     }
-
   }
-
-  // Update Temperature reading.
+  TempSensors::requestTankTemp();
   MenuUI::printTempReadings(TempSensors::getTankTemp());
+  
+
 
 }
 
@@ -124,7 +135,8 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    enc::EncoderInputType command = enc::getCommand(); // Determine pressed command.
+    enc::EncoderInputType command = enc::getCommand(command); // Determine pressed command.
+    
     switch (command)
     {
     case enc::EncoderLeft:
@@ -191,7 +203,7 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    enc::EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand(command);
     switch (command)
     {
     case enc::EncoderEnter:
@@ -222,7 +234,7 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    enc::EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand(command);
     switch (command)
     {
     case enc::EncoderEnter:
@@ -253,7 +265,7 @@ void ColorC41(){
 
   while (!confirmSelection)
   {
-    enc::EncoderInputType command = enc::getCommand();
+    enc::EncoderInputType command = enc::getCommand(command);
     switch (command)
     {
     case enc::EncoderEnter:

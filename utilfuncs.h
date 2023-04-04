@@ -16,9 +16,10 @@ namespace Utils{
     --- millisDelay | General Helper Functions ---
     Simple function for non-blocking delay.
     */
-    void millisDelay(unsigned long timeNow, uint16_t duration){
-        while(millis() < timeNow + duration){
-            // wait "duration" ms        
-        }
+    void millisDelay(unsigned long timeCalled, uint16_t duration){
+        // while(millis() < timeCalled + duration){
+        //     // wait "duration" ms        
+        // }
+        if (millis() < timeCalled + duration) return;
     }
 }
