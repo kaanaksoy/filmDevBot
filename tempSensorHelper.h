@@ -9,12 +9,13 @@
 #include "utilfuncs.h"
 
 #define ONE_WIRE_BUS_PIN 6 // Data wire is plugged into port 6 on the Arduino
-
+#define SENSOR_ERR -12.0f // Used in comm with temp sensors
+#define SENSOR_NOT_READY -1.9f // Used for comm with temp sensors
 namespace TempSensors
 {
     OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup onewire instance for comms.
     DallasTemperature tempSensors(&oneWireBus);
-    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56};
+    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; //Addr for tank sensor. change to fit yours.
 
     unsigned long requestTime; // Timestamp for temp request.
 
@@ -26,7 +27,7 @@ namespace TempSensors
         DEBUG_PRINT("Devices found");
         DEBUG_PRINT(tempSensors.getDeviceCount());
         DEBUG_PRINT("Devices");
-        tempSensors.setResolution(9);
+        tempSensors.setResolution(10);
         tempSensors.setWaitForConversion(false);
     }
 

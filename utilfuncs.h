@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Arduino.h"
+#include "globals.h"
+#include "menuHelper.h"
 
+// UI Pins
+#define BUZZER 5
 
 namespace Utils{
     /*
@@ -10,16 +14,19 @@ namespace Utils{
     */
     void buzz(int repeatTimes){
 
-        tone(BUZZER, 4000, 125);
+        for (int i = 0; i < repeatTimes; i++)
+        {
+            tone(BUZZER, 4000, 125);
+            if(repeatTimes < 2) return;
+            delay(200);
+        }
+        
     }
     /*
-    --- millisDelay | General Helper Functions ---
-    Simple function for non-blocking delay.
+    --- readyLCD | General Helper Functions ---
     */
-    void millisDelay(unsigned long timeCalled, uint16_t duration){
-        // while(millis() < timeCalled + duration){
-        //     // wait "duration" ms        
-        // }
-        if (millis() < timeCalled + duration) return;
+    void readyLCD(){
+        gLCD.clear();
+        gLCD.setCursor(0,0);
     }
 }

@@ -3,72 +3,115 @@
 #include <Arduino.h>
 #include "globals.h"
 #include "utilfuncs.h"
+#include "tempSensorHelper.h"
+#include "menuHelper.h"
+#include "debugUtils.h"
 
-namespace filmDevUtils
+//C-41 Process values
+#define MAX_PULL -1 // Maximum stops that we can pull the film
+#define MAX_PUSH 3 // Maximum stops that we can push the film
+
+//Durations for the specific processes. Based on the values from the CineStill Cs-41 Kit.
+#define PULL_ONE_DUR 165
+#define STD_DEV_DUR 210
+#define PUSH_ONE_DUR 273
+#define PUSH_TWO_DUR 368
+#define PUSH_THR_DUR 525
+#define FIXING_TIME 480
+
+namespace FilmDevHelpers
 {
     /*
     --- agitate | Film Development Helper Functions ---
-    dur: Agitate duration in seconds
-    motorPin1: Motor Control Pin 1
-    motorPin2: Motor Control Pin 2
+    duration: Agitate duration in seconds
+    AGITATE_MOT_1: Motor Control Pin 1
+    AGITATE_MOT_2: Motor Control Pin 2
     
     Runs the agitate motor for the amount of time provided, 
     each time in a different direction.
   */
-  void agitate(int dur, int motorPin1, int motorPin2){
-    bool agitateDirectionFlag = true;
-    unsigned long timeNow;
+  void agitate(int duration){
+    DEBUG_PRINT("Agitation started.");
 
+    bool agitateDirectionFlag = true;
+    bool motorRunning = false;
+    unsigned long timeNow;
+       
     switch (agitateDirectionFlag)
     {
-    case true:
-      analogWrite(motorPin1, 255);
-      analogWrite(motorPin2, 0);
-
-      timeNow = millis();
-      Utils::millisDelay(timeNow, dur*1000);
-
-      agitateDirectionFlag = false;
-      break;
-    case false:
-    default:
-      analogWrite(motorPin1, 0);
-      analogWrite(motorPin2, 255);
-
-      timeNow = millis();
-      Utils::millisDelay(timeNow, dur*1000);
-
-      agitateDirectionFlag = true;
-      break;
+      case true:
+        analogWrite(AGITATE_MOT_1, 255);
+        analogWrite(AGITATE_MOT_2, 0);     
+        agitateDirectionFlag = false;
+        break;
+      case false:
+      default:
+        analogWrite(AGITATE_MOT_1, 0);
+        analogWrite(AGITATE_MOT_2, 255);
+        agitateDirectionFlag = true;
+        break;
     }
 
-    analogWrite(motorPin1, 0);
-    analogWrite(motorPin2, 0);
-    
+    timeNow = millis();
+    motorRunning = true;
+
+    while (motorRunning)
+    {
+      if (millis() > timeNow + (duration * 1000))
+      {
+        analogWrite(AGITATE_MOT_1, 0);
+        analogWrite(AGITATE_MOT_2, 0);
+        motorRunning = false;
+      }
+      TempSensors::requestTankTemp();
+      MenuUI::printTempReadings(TempSensors::getTankTemp());
+    }
+    DEBUG_PRINT("Agitate Finished.")
     return;
   }
 
   /*
     --- vibrate | Film Development Helper Functions ---
-    motorPin1: Motor Control Pin 1
-    motorPin2: Motor Control Pin 2
+    AGITATE_MOT_1: Motor Control Pin 1
+    AGITATE_MOT_2: Motor Control Pin 2
 
     Simple vibrate function, used to release air bubbles from the emulsion surface.
   */
-  void vibrate(int motorPin1, int motorPin2){
+  void vibrate(){
+    DEBUG_PRINT("Vibrate started.");
     unsigned long timeNow;
+    bool motorRunning;
 
-    for (int i = 0; i < 4; i++)
+    for (int count = 0; count < 4; count++)
     {
-    analogWrite(motorPin1, 255);
-    analogWrite(motorPin2, 0);
-    timeNow = millis();
-    Utils::millisDelay(timeNow, 1000);
-    analogWrite(motorPin1, 0);
-    analogWrite(motorPin2, 0);
-    timeNow = millis();
-    Utils::millisDelay(timeNow, 500);
+      DEBUG_PRINT(String("Vibrated ") + count + String(" time(s)."));
+      timeNow = millis();
+      analogWrite(VIBRATE_MOT_1, 255);
+      analogWrite(VIBRATE_MOT_2, 0);
+      motorRunning = true;
+
+      while (motorRunning)
+      {
+        if (millis() > timeNow + 1000)
+        {
+          analogWrite(VIBRATE_MOT_1, 0);
+          analogWrite(VIBRATE_MOT_2, 0);
+          motorRunning = false;
+        }
+        TempSensors::requestTankTemp();
+        MenuUI::printTempReadings(TempSensors::getTankTemp());
+      }
+      timeNow = millis();
+      while (!motorRunning)
+      {
+        if (millis() > timeNow + 500) motorRunning = true;
+        TempSensors::requestTankTemp();
+        MenuUI::printTempReadings(TempSensors::getTankTemp());
+      }  
     }
+    analogWrite(VIBRATE_MOT_2, 0);
+    analogWrite(VIBRATE_MOT_1, 0);
+    DEBUG_PRINT("Vibrate Ended");
     return;
   }
 
@@ -81,30 +124,47 @@ namespace filmDevUtils
                 uint8_t agitationDurationSeconds, 
                 uint16_t agitateEveryDurationSeconds){
     
-    uint8_t totalCycles = (devDurationSeconds - firstAgitationDurationSeconds) / (agitationDurationSeconds + agitateEveryDurationSeconds);
-    uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) % (agitationDurationSeconds + agitateEveryDurationSeconds);    
+    uint8_t totalCycles = (devDurationSeconds - firstAgitationDurationSeconds) / 
+                          (agitationDurationSeconds + agitateEveryDurationSeconds);
+    uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) % 
+                      (agitationDurationSeconds + agitateEveryDurationSeconds);    
     
     unsigned long timeNow;
-
+    DEBUG_PRINT("develop(): started.");
     digitalWrite(RED_LED, HIGH);
-    agitate(firstAgitationDurationSeconds, MOT_IN1, MOT_IN2);
-    vibrate(MOT_IN3, MOT_IN4);
+    
+    agitate(firstAgitationDurationSeconds);
+    vibrate();
+
+    DEBUG_PRINT("develop(): completed initial cycle.")
     for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
     {
-      timeNow = millis();
-      Utils::millisDelay(timeNow, agitateEveryDurationSeconds*1000);
-      agitate(agitationDurationSeconds, MOT_IN1, MOT_IN2);
-      if (cycleCount + 2 >= totalCycles)
-      {
-        Utils::buzz(3);
-      }
-      timeNow = millis();
-      Utils::millisDelay(timeNow, padding*1000);
-      Utils::buzz(5);
+      DEBUG_PRINT(String("develop(): Cycle ") + cycleCount + String("started. "));
       
+      timeNow = millis();
+
+      while (millis() < timeNow + (agitateEveryDurationSeconds * 1000))
+      {
+        TempSensors::requestTankTemp();
+        MenuUI::printTempReadings(TempSensors::getTankTemp());
+        delay(250);
+      }
+      agitate(agitationDurationSeconds);
+      DEBUG_PRINT("develop(): just agitated.")
+
+      if (cycleCount + 2 >= totalCycles) Utils::buzz(3);
+      
+      timeNow = millis();
+      while (millis() < timeNow + (padding * 1000))
+      {
+        TempSensors::requestTankTemp();
+        MenuUI::printTempReadings(TempSensors::getTankTemp());
+        delay(250);
+      }
+      Utils::buzz(5);
     }
     digitalWrite(RED_LED, LOW);
-
+    DEBUG_PRINT("develop(): ending now.");
     return;
   }
   /*
@@ -114,16 +174,17 @@ namespace filmDevUtils
   void fix(uint8_t fixingDurationSeconds){
     uint8_t totalCycles = fixingDurationSeconds * 2;
     unsigned long timeNow;
+    DEBUG_PRINT("fix(): started.");
+
+    gLCD.print("Fixing...");
+
     digitalWrite(RED_LED, HIGH);
-    vibrate(MOT_IN3, MOT_IN4);
-    for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
-    {
-      agitate(15, MOT_IN1, MOT_IN2);
-      timeNow = millis();
-      Utils::millisDelay(timeNow, 15000);
-    }
+    DEBUG_PRINT("develop(): calling develop now.");
+    develop(FIXING_TIME, 10, 7, 30);
+
     Utils::buzz(6);
     digitalWrite(RED_LED, LOW);
+    DEBUG_PRINT("develop(): ending now.");
     return;
     
   }
