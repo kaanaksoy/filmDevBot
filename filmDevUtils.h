@@ -176,8 +176,6 @@ namespace FilmDevHelpers
     unsigned long timeNow;
     DEBUG_PRINT("fix(): started.");
 
-    gLCD.print("Fixing...");
-
     digitalWrite(RED_LED, HIGH);
     DEBUG_PRINT("develop(): calling develop now.");
     develop(FIXING_TIME, 10, 7, 30);

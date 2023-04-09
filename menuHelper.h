@@ -4,12 +4,16 @@
 #include "globals.h"
 #include "icons.h"
 #include "tempSensorHelper.h"
+#include "utilfuncs.h"
+#include "battUtils.h"
 
 #define LEFT_ARR_ICON_ADDR 1
 #define ENTER_ICON_ADDR 2
 #define RIGHT_ARR_ICON_ADDR 3
 #define EXIT_ICON_ADDR 4
 #define TANK_TEMP_ICON_ADDR 5
+#define BATT_CHAR_ADDR 6
+
 
 #define LCD_ADDR 0x27 //Default LCD Address. Change for your module.
 
@@ -19,11 +23,11 @@ namespace MenuUI
     // create LCD Instance
     
     // Define menu options
-    const char gMenuColor[] PROGMEM =    {"  Color    "};
-    const char gMenuC41[] PROGMEM =      {"   C-41    "};
-    const char gMenuE6[] PROGMEM =       {"   E-6     "};
-    const char gMenuBW[] PROGMEM =       {"   B&W     "};
-    const char gMenuBWCustom[] PROGMEM = {"  Custom   "};
+    const char gMenuColor[] PROGMEM =    {"  Color   "};
+    const char gMenuC41[] PROGMEM =      {"   C-41   "};
+    const char gMenuE6[] PROGMEM =       {"   E-6    "};
+    const char gMenuBW[] PROGMEM =       {"   B&W    "};
+    const char gMenuBWCustom[] PROGMEM = {"  Custom  "};
 
     // Define menu functionIDs
     enum MenuFID {
@@ -37,18 +41,42 @@ namespace MenuUI
     //create menu instance
     CMBMenu<5> gMenu;
 
+    // Due to constraints on custom chars, battery indicator is created at runtime
+    void pickBattIcon(){
+        switch (BatteryWatcher::autoMeasureChargeLevel())
+        {
+        case BatteryWatcher::batteryLevel::FullCharge:
+            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::fullBatteryChar);
+            break;
+        case BatteryWatcher::batteryLevel::MidCharge:
+            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::midBatteryChar);
+            break;
+        case BatteryWatcher::batteryLevel::LowCharge:
+            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::lowBatteryChar);
+            break;
+        case BatteryWatcher::batteryLevel::VeryLowCharge:
+            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::veryLowBatteryChar);
+            break;
+        default:
+            break;
+        }
+    }
+
     void initCustomChars(){
-        gLCD.createChar(LEFT_ARR_ICON_ADDR, Icons::leftArrowChar);
-        gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
-        gLCD.createChar(RIGHT_ARR_ICON_ADDR, Icons::rightArrowChar);
-        gLCD.createChar(EXIT_ICON_ADDR, Icons::exitChar);
-        gLCD.createChar(TANK_TEMP_ICON_ADDR, Icons::tankTempChar);
+        gLCD.createChar_P(LEFT_ARR_ICON_ADDR, Icons::leftArrowChar);
+        gLCD.createChar_P(ENTER_ICON_ADDR, Icons::enterChar);
+        gLCD.createChar_P(RIGHT_ARR_ICON_ADDR, Icons::rightArrowChar);
+        gLCD.createChar_P(EXIT_ICON_ADDR, Icons::exitChar);
+        gLCD.createChar_P(TANK_TEMP_ICON_ADDR, Icons::tankTempChar);
+        pickBattIcon();
+
     }
 
     void initLCD(){
         gLCD.begin();
         gLCD.backlight();
     }
+
 
     void printTempReadings(float tankTemp){
         
@@ -66,40 +94,49 @@ namespace MenuUI
 
         // Print menu option
         gLCD.clear();
-        gLCD.setCursor(0,0);
+        gLCD.setCursor(1,0);
         gLCD.print(infoStr);
 
         //Print navigation UI
         if (infoStr == "  Color    ")
         {
-            gLCD.setCursor(6,1);
+            gLCD.setCursor(7,1);
             gLCD.write(RIGHT_ARR_ICON_ADDR);
         } else if (infoStr == "   C-41    ")
         {
-            gLCD.setCursor(6,1);
+            gLCD.setCursor(7,1);
             gLCD.write(RIGHT_ARR_ICON_ADDR);
         } else if (infoStr == "   E-6     ")
         {
-            gLCD.setCursor(2, 1);
+            gLCD.setCursor(3, 1);
             gLCD.write(LEFT_ARR_ICON_ADDR);
         } else if (infoStr == "   B&W     ")
         {
-            gLCD.setCursor(2, 1);
+            gLCD.setCursor(3, 1);
             gLCD.write(LEFT_ARR_ICON_ADDR);
         } else if (infoStr == "  Custom   ")
         {
 
         } else
         {
-            gLCD.setCursor(2, 1);
+            gLCD.setCursor(3, 1);
             gLCD.write(LEFT_ARR_ICON_ADDR);
-            gLCD.setCursor(6,1);
+            gLCD.setCursor(7,1);
             gLCD.write(RIGHT_ARR_ICON_ADDR);
 
         }
-        gLCD.setCursor(4,1);
+
+        if((millis() - BatteryWatcher::lastBatteryCheckTime > BATT_CHECK_INTERVAL * 60 * 1000)
+            || BatteryWatcher::lastBatteryCheckTime == 0){
+            BatteryWatcher::lastBatteryCheckTime = millis(); //Reset timer to check battery.
+            pickBattIcon();
+            gLCD.setCursor(0,1);
+            gLCD.write(BATT_CHAR_ADDR);
+        }
+
+        gLCD.setCursor(5,1);
         gLCD.write(ENTER_ICON_ADDR);
-        gLCD.setCursor(9,1);
+        gLCD.setCursor(10,1);
         gLCD.write(EXIT_ICON_ADDR);
         gLCD.setCursor(11, 0);
         gLCD.write(TANK_TEMP_ICON_ADDR);

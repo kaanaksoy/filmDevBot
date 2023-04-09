@@ -7,7 +7,11 @@
 // UI Pins
 #define BUZZER 5
 
+
+
+
 namespace Utils{
+
     /*
     --- buzz | UI Helper Functions ---
     Simple buzzer control, used to simplify code.
@@ -29,4 +33,6 @@ namespace Utils{
         gLCD.clear();
         gLCD.setCursor(0,0);
     }
+
+    
 }

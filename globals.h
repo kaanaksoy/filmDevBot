@@ -15,11 +15,6 @@
 #define VIBRATE_MOT_1 10 // Vibrate Motor 1
 #define VIBRATE_MOT_2 11 // Vibrate Motor 2
 
-
-
-
-
-
 enum class machineState : uint8_t {
   IDLE,   
   DEVELOPING,

@@ -11,6 +11,7 @@
 #include "tempSensorHelper.h"
 #include "filmDev.h"
 #include "filmDevUtils.h" // Helper functions for film development
+#include "battUtils.h"
 
 
 /*
@@ -24,6 +25,8 @@ void setup(){
   #ifdef DEBUG
   Serial.begin(9600);
   #endif
+
+  BatteryWatcher::initBatteryChargeMeasurement();
 
   SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
   machineState currState = machineState::IDLE;
@@ -49,6 +52,7 @@ void setup(){
 
 // ------------ LOOP -------------
 void loop(){
+
   int fid = 0; //Function ID
 
   // Info text from menu

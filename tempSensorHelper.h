@@ -9,8 +9,8 @@
 #include "utilfuncs.h"
 
 #define ONE_WIRE_BUS_PIN 6 // Data wire is plugged into port 6 on the Arduino
-#define SENSOR_ERR -12.0f // Used in comm with temp sensors
-#define SENSOR_NOT_READY -1.9f // Used for comm with temp sensors
+#define SENSOR_ERR -99.9f // Used in comm with temp sensors
+#define SENSOR_NOT_READY -8.8f // Used for comm with temp sensors
 namespace TempSensors
 {
     OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup onewire instance for comms.
