@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Arduino.h"
-#include "debugUtils.h"
 #include "globals.h"
+#include "debugUtils.h"
 #include "icons.h"
 #include "filmDevUtils.h"
 #include "encoderHelper.h"
+#include "ledHelper.h"
+#include "stateHelper.h"
 
 
 namespace DevelopFilm
@@ -13,7 +15,7 @@ namespace DevelopFilm
     // --- ColorC41 | Film Development Functions ---
 void ColorC41(){
     DEBUG_PRINT("ColorC41(): Started now.")
-    setState(machineState::DEVELOPING);
+    StateManager::setState(StateManager::DEVELOPING);
 
     int8_t pushPullValue = 0;
     uint16_t duration;
@@ -42,7 +44,7 @@ void ColorC41(){
                 if (pushPullValue > MAX_PUSH) pushPullValue = MAX_PUSH;
                 break;
             case SystemEncoder::EncoderExit:
-                setState(machineState::IDLE);
+                StateManager::setState(StateManager::IDLE);
                 return;
             case SystemEncoder::EncoderNone:
             default:
@@ -91,7 +93,7 @@ void ColorC41(){
         /* code */
         break;
     case SystemEncoder::EncoderExit:
-        setState(machineState::IDLE);
+        StateManager::setState(StateManager::IDLE);
         return;
     default:
         break;
@@ -123,7 +125,7 @@ void ColorC41(){
         /* code */
         break;
     case SystemEncoder::EncoderExit:
-        setState(machineState::IDLE);
+        StateManager::setState(StateManager::IDLE);
         return;
     default:
         break;
@@ -150,26 +152,27 @@ void ColorC41(){
         /* code */
         break;
     case SystemEncoder::EncoderExit:
-        setState(machineState::IDLE);
+        StateManager::setState(StateManager::IDLE);
         return;
     default:
         break;
     }
 
-    setState(machineState::IDLE);
+    StateManager::setState(StateManager::IDLE);
     return;
 }
 
 
 void ColorE6(){
-    setState(machineState::DEVELOPING);
-    setState(machineState::IDLE);
+    StateManager::setState(StateManager::DEVELOPING);
+    //StatusLED::blink(5);
+    StateManager::setState(StateManager::IDLE);
     return;
 }
 
 void BWCustom(){
-    setState(machineState::DEVELOPING);
-    setState(machineState::IDLE);
+    StateManager::setState(StateManager::DEVELOPING);
+    StateManager::setState(StateManager::IDLE);
     return;
 }
 } // namespace DevelopFilm

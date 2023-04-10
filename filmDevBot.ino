@@ -3,10 +3,14 @@
 #include "CMBMenu.hpp"
 #include <LCD_I2C.h>
 
+
+// -- Headers -- 
 #include "globals.h" // Global variables
+#include "stateHelper.h"
 #include "encoderHelper.h"
 #include "debugUtils.h"
 #include "menuHelper.h"
+#include "ledHelper.h"
 #include "utilfuncs.h"
 #include "tempSensorHelper.h"
 #include "filmDev.h"
@@ -26,11 +30,10 @@ void setup(){
   Serial.begin(9600);
   #endif
 
-  BatteryWatcher::initBatteryChargeMeasurement();
-
+  //currentMillis = millis();
   SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
-  machineState currState = machineState::IDLE;
 
+  BatteryWatcher::initBatteryChargeMeasurement();
   MenuUI::initLCD();
   MenuUI::createMenu();
   TempSensors::initializeTempSensor();
@@ -53,15 +56,19 @@ void setup(){
 // ------------ LOOP -------------
 void loop(){
 
+  //currentMillis = millis();
+  if (StateManager::State.ledInUse) StatusLED::blink();
+  
+
   int fid = 0; //Function ID
 
   // Info text from menu
   const char* info;
   bool layerChanged = false; // Should navigate layers?
 
-  switch (currState)
+  switch (StateManager::State.currentState)
   {
-  case machineState::IDLE:  
+  case StateManager::IDLE:  
     SystemEncoder::EncoderInputType command = SystemEncoder::getCommand(command);  
     // Call menu methods based on command selection
     switch (command)
@@ -115,7 +122,7 @@ void loop(){
     break;
 
 
-  case machineState::DEVELOPING:
+  case StateManager::DEVELOPING:
 
     TempSensors::requestTankTemp();
     MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -123,8 +130,8 @@ void loop(){
     break;
 
 
-  case machineState::MONITORING:
-    currState = machineState::IDLE;
+  case StateManager::MONITORING:
+    setState(StateManager::IDLE);
   default:
     break;
   }

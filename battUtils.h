@@ -18,7 +18,7 @@ namespace BatteryWatcher
     unsigned long lastBatteryCheckTime = 0;
 
     // Define the levels charge to be displayed
-    enum batteryLevel {
+    enum batteryLevelType {
         FullCharge,
         MidCharge,
         LowCharge,
@@ -31,7 +31,7 @@ namespace BatteryWatcher
     }
 
     // Returns in which range the battery charge level is.
-    batteryLevel autoMeasureChargeLevel() {
+    batteryLevelType autoMeasureChargeLevel() {
         
         int voltageRead = analogRead(BATTERY_SENSE_PIN); //Read battery value.
 
