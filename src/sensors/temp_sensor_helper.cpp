@@ -1,27 +1,17 @@
-#pragma once
 
-#include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "temp_sensor_helper.hpp"
 
-#include "globals.h"
-#include "debugUtils.h"
-#include "utilfuncs.h"
-
-#define ONE_WIRE_BUS_PIN 6 // Data wire is plugged into port 6 on the Arduino
-#define SENSOR_ERR -99.9f // Used in comm with temp sensors
-#define SENSOR_NOT_READY -8.8f // Used for comm with temp sensors
 namespace TempSensors
 {
+    unsigned long requestTime;            // Timestamp for temp request.
     OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup onewire instance for comms.
     DallasTemperature tempSensors(&oneWireBus);
-    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; //Addr for tank sensor. change to fit yours.
+    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; // Addr for tank sensor. change to fit yours.
 
-    unsigned long requestTime; // Timestamp for temp request.
-
-    void initializeTempSensor(){
-        //oneWireBus.begin(ONE_WIRE_BUS_PIN);
-        //tempSensors.setOneWire(&oneWireBus);
+    void initializeTempSensor()
+    {
+        // oneWireBus.begin(ONE_WIRE_BUS_PIN);
+        // tempSensors.setOneWire(&oneWireBus);
         DEBUG_PRINT("Locating devices");
         tempSensors.begin();
         DEBUG_PRINT("Devices found");
@@ -31,29 +21,33 @@ namespace TempSensors
         tempSensors.setWaitForConversion(false);
     }
 
-    void requestTankTemp(){
-        if (millis() - requestTime >= 400)  
+    void requestTankTemp()
+    {
+        if (millis() - requestTime >= 400)
         {
             tempSensors.requestTemperaturesByAddress(tankThermometer);
             requestTime = millis();
         }
-        
     }
 
-    float getTankTemp(){
+    float getTankTemp()
+    {
 
-        if (millis() - requestTime >= 200)  
+        if (millis() - requestTime >= 200)
         {
             float tempC = tempSensors.getTempC(tankThermometer);
             if (tempC != DEVICE_DISCONNECTED_C)
             {
                 return tempC;
-            } else
+            }
+            else
             {
                 DEBUG_PRINT("Error: Could not read temperature data");
                 return SENSOR_ERR;
             }
-        } else {
+        }
+        else
+        {
             return SENSOR_NOT_READY;
         }
     }
