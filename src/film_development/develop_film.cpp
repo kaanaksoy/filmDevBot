@@ -11,14 +11,14 @@ namespace DevelopFilm
         int8_t pushPullValue = 0;
         uint16_t duration;
 
-        Utils::readyLCD();
-        MenuUI::gLCD.print("C-41 Development");
+        Display::readyDisplay();
+        Display::gLCD.print("C-41 Development");
         SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
         while (command != SystemEncoder::EncoderEnter)
         {
-            MenuUI::gLCD.setCursor(0, 1);
+            Display::gLCD.setCursor(0, 1);
             // manually adding sign & usign abs allows the text to not expand and shrink when it becomes positive or negative.
-            MenuUI::gLCD.print(
+            Display::gLCD.print(
                 String("Psh/Pll: ") +
                 (0 > pushPullValue ? "-" : "+") +
                 String(abs(pushPullValue)));
@@ -45,39 +45,39 @@ namespace DevelopFilm
             delay(400);
         }
 
-        Utils::readyLCD();
+        Display::readyDisplay();
 
         switch (pushPullValue)
         {
         case -1:
             duration = PULL_ONE_DEV_DUR;
-            MenuUI::gLCD.print("C-41, -1 Pull");
+            Display::gLCD.print("C-41, -1 Pull");
             break;
         case 0:
             duration = STD_DEV_DUR;
-            MenuUI::gLCD.print("C-41, +0 Push");
+            Display::gLCD.print("C-41, +0 Push");
             break;
         case 1:
             duration = PUSH_ONE_DEV_DUR;
-            MenuUI::gLCD.print("C-41, +1 Push");
+            Display::gLCD.print("C-41, +1 Push");
             break;
         case 2:
             duration = PUSH_TWO_DEV_DUR;
-            MenuUI::gLCD.print("C-41, +2 Push");
+            Display::gLCD.print("C-41, +2 Push");
             break;
         case 3:
             duration = PUSH_THR_DEV_DUR;
-            MenuUI::gLCD.print("C-41, +3 Push");
+            Display::gLCD.print("C-41, +3 Push");
             break;
         default:
             break;
         }
 
-        MenuUI::gLCD.setCursor(0, 1);
-        MenuUI::gLCD.setCursor(3, 1);
-        MenuUI::gLCD.write(ENTER_ICON_ADDR);
-        MenuUI::gLCD.setCursor(5, 1);
-        MenuUI::gLCD.print("to start...");
+        Display::gLCD.setCursor(0, 1);
+        Display::gLCD.setCursor(3, 1);
+        Display::gLCD.write(ENTER_ICON_ADDR);
+        Display::gLCD.setCursor(5, 1);
+        Display::gLCD.print("to start...");
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
@@ -91,23 +91,23 @@ namespace DevelopFilm
             break;
         }
 
-        Utils::readyLCD();
-        MenuUI::gLCD.print("Running.");
-        MenuUI::gLCD.setCursor(11, 0);
-        MenuUI::gLCD.write(TANK_TEMP_ICON_ADDR);
+        Display::readyDisplay();
+        Display::gLCD.print("Running.");
+        Display::gLCD.setCursor(11, 0);
+        Display::gLCD.write(TANK_TEMP_ICON_ADDR);
 
         develop(duration, 10, 6, 30);
         DEBUG_PRINT("ColorC41(): Just finished developing");
 
-        Utils::readyLCD();
+        Display::readyDisplay();
 
-        MenuUI::gLCD.print("Dev Finished");
-        MenuUI::gLCD.setCursor(0, 1);
-        MenuUI::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
-        MenuUI::gLCD.setCursor(0, 1);
-        MenuUI::gLCD.write(ENTER_ICON_ADDR);
-        MenuUI::gLCD.setCursor(2, 1);
-        MenuUI::gLCD.print("to strt fixing");
+        Display::gLCD.print("Dev Finished");
+        Display::gLCD.setCursor(0, 1);
+        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
+        Display::gLCD.setCursor(0, 1);
+        Display::gLCD.write(ENTER_ICON_ADDR);
+        Display::gLCD.setCursor(2, 1);
+        Display::gLCD.print("to strt fixing");
 
         DEBUG_PRINT("ColorC41(): Starting Fixing.")
 
@@ -123,20 +123,20 @@ namespace DevelopFilm
             break;
         }
 
-        Utils::readyLCD();
-        MenuUI::gLCD.print("Fixing...");
-        MenuUI::gLCD.setCursor(11, 0);
-        MenuUI::gLCD.write(TANK_TEMP_ICON_ADDR);
+        Display::readyDisplay();
+        Display::gLCD.print("Fixing...");
+        Display::gLCD.setCursor(11, 0);
+        Display::gLCD.write(TANK_TEMP_ICON_ADDR);
         fix(FIXING_DUR);
 
-        Utils::readyLCD();
-        MenuUI::gLCD.print("Process Finished");
-        MenuUI::gLCD.setCursor(0, 1);
-        MenuUI::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
-        MenuUI::gLCD.setCursor(3, 1);
-        MenuUI::gLCD.write(ENTER_ICON_ADDR);
-        MenuUI::gLCD.setCursor(5, 1);
-        MenuUI::gLCD.print("to exit...");
+        Display::readyDisplay();
+        Display::gLCD.print("Process Finished");
+        Display::gLCD.setCursor(0, 1);
+        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
+        Display::gLCD.setCursor(3, 1);
+        Display::gLCD.write(ENTER_ICON_ADDR);
+        Display::gLCD.setCursor(5, 1);
+        Display::gLCD.print("to exit...");
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {

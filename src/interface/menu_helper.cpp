@@ -2,7 +2,6 @@
 
 namespace MenuUI
 {
-    LCD_I2C gLCD(LCD_ADDR, 16, 2);
     CMBMenu<5> gMenu;
 
     // Define menu options
@@ -12,59 +11,14 @@ namespace MenuUI
     const char gMenuBW[] PROGMEM = {"   B&W    "};
     const char gMenuBWCustom[] PROGMEM = {"  Custom  "};
 
-    void initLCD()
-    {
-        gLCD.begin();
-        gLCD.backlight();
-    }
-
-    // Due to constraints on custom chars, battery indicator is created at runtime
-    void pickBattIcon()
-    {
-        static BatteryMonitor::batteryLevelType prevChargeLevel = BatteryMonitor::batteryLevelType::FullCharge;
-        BatteryMonitor::batteryLevelType newChargeLevel = BatteryMonitor::measureChargeLevel();
-
-        if (prevChargeLevel == newChargeLevel)
-        {
-            return;
-        }
-
-        switch (BatteryMonitor::measureChargeLevel())
-        {
-        case BatteryMonitor::batteryLevelType::FullCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::fullBatteryChar);
-            break;
-        case BatteryMonitor::batteryLevelType::MidCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::midBatteryChar);
-            break;
-        case BatteryMonitor::batteryLevelType::LowCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::lowBatteryChar);
-            break;
-        case BatteryMonitor::batteryLevelType::VeryLowCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::veryLowBatteryChar);
-            break;
-        default:
-            break;
-        }
-    }
-
-    void initCustomChars()
-    {
-        gLCD.createChar_P(LEFT_ARR_ICON_ADDR, Icons::leftArrowChar);
-        gLCD.createChar_P(ENTER_ICON_ADDR, Icons::enterChar);
-        gLCD.createChar_P(RIGHT_ARR_ICON_ADDR, Icons::rightArrowChar);
-        gLCD.createChar_P(EXIT_ICON_ADDR, Icons::exitChar);
-        gLCD.createChar_P(TANK_TEMP_ICON_ADDR, Icons::tankTempChar);
-        pickBattIcon();
-    }
-
+    // Print the development tank temp at the same location every time;
     void printTempReadings(float tankTemp)
     {
 
         if (tankTemp == SENSOR_NOT_READY)
             return;
-        gLCD.setCursor(12, 0);
-        gLCD.print(tankTemp);
+        Display::gLCD.setCursor(12, 0);
+        Display::gLCD.print(tankTemp);
     }
 
     // --- printMenuEntry | Menu Functions ---
@@ -75,55 +29,55 @@ namespace MenuUI
         MBHelper::stringFromPgm(funcInfo, infoStr);
 
         // Print menu option
-        gLCD.clear();
-        gLCD.setCursor(1, 0);
-        gLCD.print(infoStr);
+        Display::gLCD.clear();
+        Display::gLCD.setCursor(1, 0);
+        Display::gLCD.print(infoStr);
 
         // Print navigation UI
         if (infoStr == "  Color   ")
         {
-            gLCD.setCursor(7, 1);
-            gLCD.write(RIGHT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(7, 1);
+            Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
         }
         else if (infoStr == "   C-41   ")
         {
-            gLCD.setCursor(7, 1);
-            gLCD.write(RIGHT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(7, 1);
+            Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
         }
         else if (infoStr == "   E-6    ")
         {
-            gLCD.setCursor(3, 1);
-            gLCD.write(LEFT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(3, 1);
+            Display::gLCD.write(LEFT_ARR_ICON_ADDR);
         }
         else if (infoStr == "   B&W    ")
         {
-            gLCD.setCursor(3, 1);
-            gLCD.write(LEFT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(3, 1);
+            Display::gLCD.write(LEFT_ARR_ICON_ADDR);
         }
         else if (infoStr == "  Custom  ")
         {
         }
         else
         {
-            gLCD.setCursor(3, 1);
-            gLCD.write(LEFT_ARR_ICON_ADDR);
-            gLCD.setCursor(7, 1);
-            gLCD.write(RIGHT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(3, 1);
+            Display::gLCD.write(LEFT_ARR_ICON_ADDR);
+            Display::gLCD.setCursor(7, 1);
+            Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
         }
 
-        gLCD.setCursor(0, 0);
-        gLCD.write(BATT_CHAR_ADDR);
-        gLCD.setCursor(5, 1);
-        gLCD.write(ENTER_ICON_ADDR);
-        gLCD.setCursor(10, 1);
-        gLCD.write(EXIT_ICON_ADDR);
-        gLCD.setCursor(11, 0);
-        gLCD.write(TANK_TEMP_ICON_ADDR);
+        Display::gLCD.setCursor(0, 0);
+        Display::gLCD.write(BATT_CHAR_ADDR);
+        Display::gLCD.setCursor(5, 1);
+        Display::gLCD.write(ENTER_ICON_ADDR);
+        Display::gLCD.setCursor(10, 1);
+        Display::gLCD.write(EXIT_ICON_ADDR);
+        Display::gLCD.setCursor(11, 0);
+        Display::gLCD.write(TANK_TEMP_ICON_ADDR);
 
         if ((StateManager::State.currentMillis - BatteryMonitor::lastBatteryCheckTime > BATT_CHECK_PERIOD * 60 * 1000) || BatteryMonitor::lastBatteryCheckTime == 0)
         {
             BatteryMonitor::lastBatteryCheckTime = StateManager::State.currentMillis; // Reset timer to check battery.
-            pickBattIcon();
+            Display::pickBatteryIcon();
         }
         printTempReadings(TempSensors::getTankTemp());
     }
@@ -138,7 +92,7 @@ namespace MenuUI
         gMenu.addNode(0, gMenuBW, MenuBW);
         gMenu.addNode(1, gMenuBWCustom, MenuBWCustom);
 
-        initCustomChars();
+        Display::initCustomChars();
         // Build & Print Menu
         const char *info;
         gMenu.buildMenu(info);

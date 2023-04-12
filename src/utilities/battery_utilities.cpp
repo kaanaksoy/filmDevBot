@@ -19,7 +19,11 @@ namespace BatteryMonitor
         int voltageRead = analogRead(BATTERY_SENSE_PIN); // Read battery value.
         lastBatteryCheckTime = StateManager::State.currentMillis;
 
-        if (voltageRead >= FULL_CHARGE_THRESHOLD)
+        if (voltageRead == 0)
+        {
+            return BatteryDisconnected;
+        }
+        else if (voltageRead >= FULL_CHARGE_THRESHOLD)
         {
             return FullCharge;
         }

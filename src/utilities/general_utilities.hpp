@@ -13,10 +13,6 @@ namespace Utils
     Simple buzzer control, used to simplify code.
     */
     void buzz(int repeatTimes);
-    /*
-    --- readyLCD | General Helper Functions ---
-    */
-    void readyLCD();
 
 }
 

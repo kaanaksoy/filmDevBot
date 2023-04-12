@@ -20,6 +20,7 @@
 #include "src/sensors/temp_sensor_helper.hpp"
 #include "src/film_development/develop_film.hpp"
 #include "src/utilities/battery_utilities.hpp"
+#include "src/interface/lcd_helper.hpp"
 
 /* ---------------------------------- SETUP --------------------------------- */
 void setup()
@@ -33,7 +34,7 @@ void setup()
   SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
 
   BatteryMonitor::initBatteryChargeMeasurement();
-  MenuUI::initLCD();
+  Display::initDisplay();
   MenuUI::createMenu();
   TempSensors::initializeTempSensor();
 

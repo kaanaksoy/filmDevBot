@@ -9,11 +9,10 @@
 #include "../sensors/temp_sensor_helper.hpp"
 #include "../utilities/general_utilities.hpp"
 #include "../utilities/battery_utilities.hpp"
+#include "../interface/lcd_helper.hpp"
 
 namespace MenuUI
 {
-    // create LCD Instance
-    extern LCD_I2C gLCD;
 
     // Define menu options
     extern const char gMenuColor[];
@@ -35,13 +34,7 @@ namespace MenuUI
     // create menu instance
     extern CMBMenu<5> gMenu;
 
-    void initLCD();
-
-    // Due to constraints on custom chars, battery indicator icon is re-created as necessary
-    void pickBattIcon();
-
-    void initCustomChars();
-
+    // Print the development tank temp at the same location every time;
     void printTempReadings(float tankTemp);
 
     // --- printMenuEntry | Menu Functions ---

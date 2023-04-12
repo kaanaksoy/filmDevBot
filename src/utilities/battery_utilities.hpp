@@ -14,7 +14,8 @@ namespace BatteryMonitor
         FullCharge,
         MidCharge,
         LowCharge,
-        VeryLowCharge
+        VeryLowCharge,
+        BatteryDisconnected
     };
     void initBatteryChargeMeasurement();
 

@@ -8,6 +8,7 @@
 #include "../resources/icons.hpp"
 #include "../interface/encoder_helper.hpp"
 #include "../interface/led_helper.hpp"
+#include "../interface/lcd_helper.hpp"
 #include "../utilities/state_manager.hpp"
 #include "../interface/menu_helper.hpp"
 #include "../utilities/general_utilities.hpp"
@@ -15,43 +16,43 @@
 
 namespace DevelopFilm
 {
-    // --- ColorC41 | Film Development Functions ---
-    void ColorC41();
+  // --- ColorC41 | Film Development Functions ---
+  void ColorC41();
 
-    void ColorE6();
+  void ColorE6();
 
-    void BWCustom();
+  void BWCustom();
 
-    /*
-        --- agitate | Film Development Helper Functions ---
-        duration: Agitate duration in seconds
-        AGITATE_MOT_1: Motor Control Pin 1
-        AGITATE_MOT_2: Motor Control Pin 2
-
-        Runs the agitate motor for the amount of time provided,
-        each time in a different direction.
-    */
-    void agitate(int duration);
-
-    /*
-      --- vibrate | Film Development Helper Functions ---
+  /*
+      --- agitate | Film Development Helper Functions ---
+      duration: Agitate duration in seconds
       AGITATE_MOT_1: Motor Control Pin 1
       AGITATE_MOT_2: Motor Control Pin 2
 
-      Simple vibrate function, used to release air bubbles from the emulsion surface.
-    */
-    void vibrate();
+      Runs the agitate motor for the amount of time provided,
+      each time in a different direction.
+  */
+  void agitate(int duration);
 
-    /*
-      --- develop | Film Development Functions ---
-      Develop function that handles the development process.
-    */
-    void develop(uint16_t devDurationSeconds,
-                 uint8_t firstAgitationDurationSeconds,
-                 uint8_t agitationDurationSeconds,
-                 uint16_t agitateEveryDurationSeconds);
+  /*
+    --- vibrate | Film Development Helper Functions ---
+    AGITATE_MOT_1: Motor Control Pin 1
+    AGITATE_MOT_2: Motor Control Pin 2
 
-    void fix(uint8_t fixingDurationSeconds);
+    Simple vibrate function, used to release air bubbles from the emulsion surface.
+  */
+  void vibrate();
+
+  /*
+    --- develop | Film Development Functions ---
+    Develop function that handles the development process.
+  */
+  void develop(uint16_t devDurationSeconds,
+               uint8_t firstAgitationDurationSeconds,
+               uint8_t agitationDurationSeconds,
+               uint16_t agitateEveryDurationSeconds);
+
+  void fix(uint8_t fixingDurationSeconds);
 
 } // namespace DevelopFilm
 

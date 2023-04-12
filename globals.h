@@ -46,6 +46,8 @@
 
 // Default LCD Address that matches my unit. Change for your module.
 #define LCD_ADDR 0x27
+#define LCD_COLS 16
+#define LCD_ROWS 2
 
 /* ------------------------------ Motor Control ----------------------------- */
 /* Motor Driver Pins, based on the mini L298 motor driver, change to suit your

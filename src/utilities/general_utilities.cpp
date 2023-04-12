@@ -18,13 +18,5 @@ namespace Utils
             delay(200);
         }
     }
-    /*
-    --- readyLCD | General Helper Functions ---
-    */
-    void readyLCD()
-    {
-        MenuUI::gLCD.clear();
-        MenuUI::gLCD.setCursor(0, 0);
-    }
 
 }

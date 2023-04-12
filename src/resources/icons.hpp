@@ -3,34 +3,36 @@
 
 // Locations to store the custom icons on the HITACHI control board.
 //  for more information please check createChar() documentation
-#define LEFT_ARR_ICON_ADDR 1
+#define LEFT_ARR_ICON_ADDR (char)60
 #define ENTER_ICON_ADDR 2
-#define RIGHT_ARR_ICON_ADDR 3
+#define RIGHT_ARR_ICON_ADDR (char)62
 #define EXIT_ICON_ADDR 4
 #define TANK_TEMP_ICON_ADDR 5
 #define BATT_CHAR_ADDR 6
 
 namespace Icons
 {
-    const byte leftArrowChar[8] PROGMEM = {
-        B00000,
-        B00010,
-        B00110,
-        B01111,
-        B11111,
-        B01111,
-        B00110,
-        B00010};
+    // // TODO will be replaced with ASCII char 60
+    // const byte leftArrowChar[8] PROGMEM = {
+    //     B00000,
+    //     B00010,
+    //     B00110,
+    //     B01111,
+    //     B11111,
+    //     B01111,
+    //     B00110,
+    //     B00010};
 
-    const byte rightArrowChar[8] PROGMEM = {
-        B00000,
-        B01000,
-        B01100,
-        B11110,
-        B11111,
-        B11110,
-        B01100,
-        B01000};
+    // // TODO will be replaced with ASCII char 62
+    // const byte rightArrowChar[8] PROGMEM = {
+    //     B00000,
+    //     B01000,
+    //     B01100,
+    //     B11110,
+    //     B11111,
+    //     B11110,
+    //     B01100,
+    //     B01000};
 
     const byte enterChar[8] PROGMEM = {
         B00001,
@@ -71,6 +73,7 @@ namespace Icons
         B01000,
         B01000,
         B01000};
+
     const byte veryLowBatteryChar[8] PROGMEM = {
         B01110,
         B10001,
@@ -109,6 +112,16 @@ namespace Icons
         B11111,
         B11111,
         B11111,
+        B11111};
+
+    const byte batteryDisconnectedChar[8] PROGMEM = {
+        B01110,
+        B11111,
+        B01110,
+        B10101,
+        B11011,
+        B10101,
+        B01110,
         B11111};
 
 } // namespace Icons
