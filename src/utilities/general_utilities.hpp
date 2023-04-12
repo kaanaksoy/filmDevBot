@@ -5,9 +5,6 @@
 #include "../../globals.h"
 #include "../interface/menu_helper.hpp"
 
-// UI Pins
-#define BUZZER 5
-
 namespace Utils
 {
 

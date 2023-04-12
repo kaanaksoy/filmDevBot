@@ -23,17 +23,17 @@ namespace TempSensors
 
     void requestTankTemp()
     {
-        if (millis() - requestTime >= 400)
+        if (currentMillis - requestTime >= 400)
         {
             tempSensors.requestTemperaturesByAddress(tankThermometer);
-            requestTime = millis();
+            requestTime = currentMillis;
         }
     }
 
     float getTankTemp()
     {
 
-        if (millis() - requestTime >= 200)
+        if (currentMillis - requestTime >= 200)
         {
             float tempC = tempSensors.getTempC(tankThermometer);
             if (tempC != DEVICE_DISCONNECTED_C)

@@ -21,18 +21,26 @@ namespace MenuUI
     // Due to constraints on custom chars, battery indicator is created at runtime
     void pickBattIcon()
     {
-        switch (BatteryWatcher::autoMeasureChargeLevel())
+        static BatteryMonitor::batteryLevelType prevChargeLevel = BatteryMonitor::batteryLevelType::FullCharge;
+        BatteryMonitor::batteryLevelType newChargeLevel = BatteryMonitor::measureChargeLevel();
+
+        if (prevChargeLevel == newChargeLevel)
         {
-        case BatteryWatcher::batteryLevelType::FullCharge:
+            return;
+        }
+
+        switch (BatteryMonitor::measureChargeLevel())
+        {
+        case BatteryMonitor::batteryLevelType::FullCharge:
             gLCD.createChar_P(BATT_CHAR_ADDR, Icons::fullBatteryChar);
             break;
-        case BatteryWatcher::batteryLevelType::MidCharge:
+        case BatteryMonitor::batteryLevelType::MidCharge:
             gLCD.createChar_P(BATT_CHAR_ADDR, Icons::midBatteryChar);
             break;
-        case BatteryWatcher::batteryLevelType::LowCharge:
+        case BatteryMonitor::batteryLevelType::LowCharge:
             gLCD.createChar_P(BATT_CHAR_ADDR, Icons::lowBatteryChar);
             break;
-        case BatteryWatcher::batteryLevelType::VeryLowCharge:
+        case BatteryMonitor::batteryLevelType::VeryLowCharge:
             gLCD.createChar_P(BATT_CHAR_ADDR, Icons::veryLowBatteryChar);
             break;
         default:
@@ -112,9 +120,9 @@ namespace MenuUI
         gLCD.setCursor(11, 0);
         gLCD.write(TANK_TEMP_ICON_ADDR);
 
-        if ((millis() - BatteryWatcher::lastBatteryCheckTime > BATT_CHECK_INTERVAL * 60 * 1000) || BatteryWatcher::lastBatteryCheckTime == 0)
+        if ((currentMillis - BatteryMonitor::lastBatteryCheckTime > BATT_CHECK_PERIOD * 60 * 1000) || BatteryMonitor::lastBatteryCheckTime == 0)
         {
-            BatteryWatcher::lastBatteryCheckTime = millis(); // Reset timer to check battery.
+            BatteryMonitor::lastBatteryCheckTime = currentMillis; // Reset timer to check battery.
             pickBattIcon();
         }
         printTempReadings(TempSensors::getTankTemp());

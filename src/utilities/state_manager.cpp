@@ -2,7 +2,7 @@
 
 namespace StateManager
 {
-    state State = {IDLE, false, false};
+    state State = {IDLE, false, false, millis()};
 
     void setState(OperationStateType newState)
     {

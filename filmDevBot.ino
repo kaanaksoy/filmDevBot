@@ -20,6 +20,8 @@
   - Automates your film development using AP Tanks.
 */
 
+unsigned long currentMillis = millis();
+
 // ------------ SETUP -------------
 void setup()
 {
@@ -28,10 +30,10 @@ void setup()
   Serial.begin(9600);
 #endif
 
-  // currentMillis = millis();
+  currentMillis = millis();
   SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
 
-  BatteryWatcher::initBatteryChargeMeasurement();
+  BatteryMonitor::initBatteryChargeMeasurement();
   MenuUI::initLCD();
   MenuUI::createMenu();
   TempSensors::initializeTempSensor();
@@ -44,7 +46,7 @@ void setup()
 
   // Initialize UI pins.
   pinMode(BUZZER, OUTPUT);
-  pinMode(RED_LED, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
   // Initialize encoder button.
   pinMode(ENC_SW, INPUT);
 }
@@ -53,7 +55,8 @@ void setup()
 void loop()
 {
 
-  // currentMillis = millis();
+  currentMillis = millis();
+
   if (StateManager::State.ledInUse)
     StatusLED::blink();
 

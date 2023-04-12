@@ -20,6 +20,7 @@ namespace StateManager
         OperationStateType currentState;
         bool ledInUse;
         bool buzzerInUse;
+        unsigned long currMillis;
     };
 
     extern state State;

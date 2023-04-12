@@ -50,7 +50,7 @@ namespace DevelopFilm
         switch (pushPullValue)
         {
         case -1:
-            duration = PULL_ONE_DUR;
+            duration = PULL_ONE_DEV_DUR;
             MenuUI::gLCD.print("C-41, -1 Pull");
             break;
         case 0:
@@ -58,15 +58,15 @@ namespace DevelopFilm
             MenuUI::gLCD.print("C-41, +0 Push");
             break;
         case 1:
-            duration = PUSH_ONE_DUR;
+            duration = PUSH_ONE_DEV_DUR;
             MenuUI::gLCD.print("C-41, +1 Push");
             break;
         case 2:
-            duration = PUSH_TWO_DUR;
+            duration = PUSH_TWO_DEV_DUR;
             MenuUI::gLCD.print("C-41, +2 Push");
             break;
         case 3:
-            duration = PUSH_THR_DUR;
+            duration = PUSH_THR_DEV_DUR;
             MenuUI::gLCD.print("C-41, +3 Push");
             break;
         default:
@@ -127,7 +127,7 @@ namespace DevelopFilm
         MenuUI::gLCD.print("Fixing...");
         MenuUI::gLCD.setCursor(11, 0);
         MenuUI::gLCD.write(TANK_TEMP_ICON_ADDR);
-        fix(FIXING_TIME);
+        fix(FIXING_DUR);
 
         Utils::readyLCD();
         MenuUI::gLCD.print("Process Finished");
@@ -184,7 +184,7 @@ namespace DevelopFilm
 
         bool agitateDirectionFlag = true;
         bool motorRunning = false;
-        unsigned long timeNow;
+        unsigned long motorStartMillis;
 
         switch (agitateDirectionFlag)
         {
@@ -201,12 +201,12 @@ namespace DevelopFilm
             break;
         }
 
-        timeNow = millis();
+        motorStartMillis = currentMillis;
         motorRunning = true;
 
         while (motorRunning)
         {
-            if (millis() > timeNow + (duration * 1000))
+            if (currentMillis > motorStartMillis + (duration * 1000))
             {
                 analogWrite(AGITATE_MOT_1, 0);
                 analogWrite(AGITATE_MOT_2, 0);
@@ -229,20 +229,20 @@ namespace DevelopFilm
     void vibrate()
     {
         DEBUG_PRINT("Vibrate started.");
-        unsigned long timeNow;
+        unsigned long motorStartTime;
         bool motorRunning;
 
         for (int count = 0; count < 4; count++)
         {
             DEBUG_PRINT(String("Vibrated ") + count + String(" time(s)."));
-            timeNow = millis();
+            motorStartTime = currentMillis;
             analogWrite(VIBRATE_MOT_1, 255);
             analogWrite(VIBRATE_MOT_2, 0);
             motorRunning = true;
 
             while (motorRunning)
             {
-                if (millis() > timeNow + 1000)
+                if (currentMillis > motorStartTime + 1000)
                 {
                     analogWrite(VIBRATE_MOT_1, 0);
                     analogWrite(VIBRATE_MOT_2, 0);
@@ -251,10 +251,10 @@ namespace DevelopFilm
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
             }
-            timeNow = millis();
+            motorRunning = currentMillis;
             while (!motorRunning)
             {
-                if (millis() > timeNow + 500)
+                if (currentMillis > motorRunning + 500)
                     motorRunning = true;
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -281,9 +281,9 @@ namespace DevelopFilm
         uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) %
                           (agitationDurationSeconds + agitateEveryDurationSeconds);
 
-        unsigned long timeNow;
+        unsigned long startTime;
         DEBUG_PRINT("develop(): started.");
-        digitalWrite(RED_LED, HIGH);
+        digitalWrite(RED_LED_PIN, HIGH);
 
         agitate(firstAgitationDurationSeconds);
         vibrate();
@@ -293,9 +293,9 @@ namespace DevelopFilm
         {
             DEBUG_PRINT(String("develop(): Cycle ") + cycleCount + String("started. "));
 
-            timeNow = millis();
+            startTime = currentMillis;
 
-            while (millis() < timeNow + (agitateEveryDurationSeconds * 1000))
+            while (currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -307,8 +307,8 @@ namespace DevelopFilm
             if (cycleCount + 2 >= totalCycles)
                 Utils::buzz(3);
 
-            timeNow = millis();
-            while (millis() < timeNow + (padding * 1000))
+            startTime = currentMillis;
+            while (currentMillis < startTime + (padding * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -316,7 +316,7 @@ namespace DevelopFilm
             }
             Utils::buzz(5);
         }
-        digitalWrite(RED_LED, LOW);
+        digitalWrite(RED_LED_PIN, LOW);
         DEBUG_PRINT("develop(): ending now.");
         return;
     }
@@ -326,16 +326,14 @@ namespace DevelopFilm
       */
     void fix(uint8_t fixingDurationSeconds)
     {
-        uint8_t totalCycles = fixingDurationSeconds * 2;
-        unsigned long timeNow;
         DEBUG_PRINT("fix(): started.");
 
-        digitalWrite(RED_LED, HIGH);
+        digitalWrite(RED_LED_PIN, HIGH);
         DEBUG_PRINT("develop(): calling develop now.");
-        develop(FIXING_TIME, 10, 7, 30);
+        develop(FIXING_DUR, 10, 7, 30);
 
         Utils::buzz(6);
-        digitalWrite(RED_LED, LOW);
+        digitalWrite(RED_LED_PIN, LOW);
         DEBUG_PRINT("develop(): ending now.");
         return;
     }

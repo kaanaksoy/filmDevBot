@@ -1,7 +1,7 @@
 
 #include "battery_utilities.hpp"
 
-namespace BatteryWatcher
+namespace BatteryMonitor
 {
     unsigned long lastBatteryCheckTime = 0;
 
@@ -9,14 +9,15 @@ namespace BatteryWatcher
     {
         analogReference(EXTERNAL);
         DEBUG_PRINT("Reading from AREF EXTERNAL");
-        lastBatteryCheckTime = millis();
+        lastBatteryCheckTime = currentMillis;
     }
 
     // Returns in which range the battery charge level is.
-    batteryLevelType autoMeasureChargeLevel()
+    batteryLevelType measureChargeLevel()
     {
 
         int voltageRead = analogRead(BATTERY_SENSE_PIN); // Read battery value.
+        lastBatteryCheckTime = currentMillis;
 
         if (voltageRead >= FULL_CHARGE_THRESHOLD)
         {
@@ -34,5 +35,10 @@ namespace BatteryWatcher
         {
             return VeryLowCharge;
         }
+    }
+
+    void powerOff()
+    {
+        return;
     }
 } // namespace BatteryWatcher

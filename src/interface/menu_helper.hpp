@@ -5,7 +5,7 @@
 #include <LCD_I2C.h>
 
 #include "../../globals.h"
-#include "../../icons.h"
+#include "../resources/icons.hpp"
 #include "../sensors/temp_sensor_helper.hpp"
 #include "../utilities/general_utilities.hpp"
 #include "../utilities/battery_utilities.hpp"
@@ -37,7 +37,7 @@ namespace MenuUI
 
     void initLCD();
 
-    // Due to constraints on custom chars, battery indicator is created at runtime
+    // Due to constraints on custom chars, battery indicator icon is re-created as necessary
     void pickBattIcon();
 
     void initCustomChars();

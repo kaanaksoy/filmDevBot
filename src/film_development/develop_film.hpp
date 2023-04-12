@@ -5,7 +5,7 @@
 #include "Arduino.h"
 #include "../../globals.h"
 #include "../../debugUtils.h"
-#include "../../icons.h"
+#include "../resources/icons.hpp"
 #include "../interface/encoder_helper.hpp"
 #include "../interface/led_helper.hpp"
 #include "../utilities/state_manager.hpp"

@@ -1,31 +1,109 @@
-#pragma once
+#ifndef GLOBALS_H
+#define GLOBALS_H
 
-#define RED_LED 7
+/* -------------------------------------------------------------------------- */
+/*                             Global constants                             */
+/*                                                                            */
+/*                                                                            */
+/*                                                                            */
+/* ---- All of the global constants, variables & pin definitions are here --- */
+/* -------------------------------------------------------------------------- */
 
-// Motor Driver Pins
-// (Using Mini L298 Motor Driver Board)
-#define AGITATE_MOT_1 8  // Agitate Motor 1
-#define AGITATE_MOT_2 9  // Agitate Motor 2
-#define VIBRATE_MOT_1 10 // Vibrate Motor 1
-#define VIBRATE_MOT_2 11 // Vibrate Motor 2
+/* -------------------------------------------------------------------------- */
+/*                       Constants for C-41 Development                       */
+/* -------------------------------------------------------------------------- */
 
-#define LEFT_ARR_ICON_ADDR 1
-#define ENTER_ICON_ADDR 2
-#define RIGHT_ARR_ICON_ADDR 3
-#define EXIT_ICON_ADDR 4
-#define TANK_TEMP_ICON_ADDR 5
-#define BATT_CHAR_ADDR 6
+// Maximum stops that we can pull the film
+#define MAX_PULL -1
+// Maximum stops that we can push the film
+#define MAX_PUSH 3
 
-#define LCD_ADDR 0x27 // Default LCD Address. Change for your module.
-
-// C-41 Process values
-#define MAX_PULL -1 // Maximum stops that we can pull the film
-#define MAX_PUSH 3  // Maximum stops that we can push the film
-
-// Durations for the specific processes. Based on the values from the CineStill Cs-41 Kit.
-#define PULL_ONE_DUR 165
+// Durations for the specific processes.
+// Based on the values from the CineStill Cs-41 Kit.
+#define PULL_ONE_DEV_DUR 165
 #define STD_DEV_DUR 210
-#define PUSH_ONE_DUR 273
-#define PUSH_TWO_DUR 368
-#define PUSH_THR_DUR 525
-#define FIXING_TIME 480
+#define PUSH_ONE_DEV_DUR 273
+#define PUSH_TWO_DEV_DUR 368
+#define PUSH_THR_DEV_DUR 525
+#define FIXING_DUR 480
+
+/* -------------------------------------------------------------------------- */
+/*                             Constants Interface                            */
+/* -------------------------------------------------------------------------- */
+
+#define BUZZER 5
+#define RED_LED_PIN 7
+// Adjust to change how fast the LED blinks.
+#define BLINK_PERIOD 1000
+
+/* ---------------------- RGB LED with FastLED Library ---------------------- */
+
+// Number of LEDs connected in series
+#define NUM_LEDS 1
+#define RGB_LED_PIN 12
+// (0-255) Sets max brightness
+#define STATUS_LED_BRIGHTNESS 50
+
+// Default LCD Address that matches my unit. Change for your module.
+#define LCD_ADDR 0x27
+
+/* ------------------------------ Motor Control ----------------------------- */
+/* Motor Driver Pins, based on the mini L298 motor driver, change to suit your
+    needs.
+*/
+
+#define AGITATE_MOT_1 8
+#define AGITATE_MOT_2 9
+#define VIBRATE_MOT_1 10
+#define VIBRATE_MOT_2 11
+
+// The PWM value for the vibrate motor, use it to set your vibrate motor speed (0 - 255)
+#define VIBRATE_PWM
+// The PWM value for the agitate motor, use it to set your agitate motor speed (0 - 255)
+#define AGITATE_PWM
+
+/* --------------------------------- Encoder -------------------------------- */
+
+// Encoder In A
+#define ENC_DT 3
+// Encoder In B
+#define ENC_CLK 2
+// Encoder Button
+#define ENC_SW 4
+// Encoder button long press duration
+#define LONG_PRESS_DUR 500
+
+/* --------------------------------- Sensors -------------------------------- */
+
+// Data wire is plugged into port 6 on the Arduino
+#define ONE_WIRE_BUS_PIN 6
+
+/* -------------------------------------------------------------------------- */
+/*                         Battery Charge Measurement                         */
+/* -------------------------------------------------------------------------- */
+
+#define BATTERY_SENSE_PIN A0
+
+// Adjust this constant to change how often battery is checked (in minutes).
+#define BATT_CHECK_PERIOD 2
+
+/* The following thresholds are based on experimentation with the specific
+    ATMEGA Chip used in development. They may be inaccurate in other instances.
+
+    In my case the values are best defined by the function:
+        voltageRead = 212.365(batteryVoltage) + 140.332
+*/
+#define FULL_CHARGE_THRESHOLD 950
+#define MID_CHARGE_THRESHOLD 870
+#define LOW_CHARGE_THRESHOLD 780
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*                              Global variables                              */
+/* -------------------------------------------------------------------------- */
+
+extern unsigned long currentMillis;
+
+#endif
