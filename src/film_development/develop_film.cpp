@@ -201,12 +201,12 @@ namespace DevelopFilm
             break;
         }
 
-        motorStartMillis = currentMillis;
+        motorStartMillis = StateManager::State.currentMillis;
         motorRunning = true;
 
         while (motorRunning)
         {
-            if (currentMillis > motorStartMillis + (duration * 1000))
+            if (StateManager::State.currentMillis > motorStartMillis + (duration * 1000))
             {
                 analogWrite(AGITATE_MOT_1, 0);
                 analogWrite(AGITATE_MOT_2, 0);
@@ -235,14 +235,14 @@ namespace DevelopFilm
         for (int count = 0; count < 4; count++)
         {
             DEBUG_PRINT(String("Vibrated ") + count + String(" time(s)."));
-            motorStartTime = currentMillis;
+            motorStartTime = StateManager::State.currentMillis;
             analogWrite(VIBRATE_MOT_1, 255);
             analogWrite(VIBRATE_MOT_2, 0);
             motorRunning = true;
 
             while (motorRunning)
             {
-                if (currentMillis > motorStartTime + 1000)
+                if (StateManager::State.currentMillis > motorStartTime + 1000)
                 {
                     analogWrite(VIBRATE_MOT_1, 0);
                     analogWrite(VIBRATE_MOT_2, 0);
@@ -251,10 +251,10 @@ namespace DevelopFilm
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
             }
-            motorRunning = currentMillis;
+            motorRunning = StateManager::State.currentMillis;
             while (!motorRunning)
             {
-                if (currentMillis > motorRunning + 500)
+                if (StateManager::State.currentMillis > motorRunning + 500)
                     motorRunning = true;
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -293,9 +293,9 @@ namespace DevelopFilm
         {
             DEBUG_PRINT(String("develop(): Cycle ") + cycleCount + String("started. "));
 
-            startTime = currentMillis;
+            startTime = StateManager::State.currentMillis;
 
-            while (currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
+            while (StateManager::State.currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -307,8 +307,8 @@ namespace DevelopFilm
             if (cycleCount + 2 >= totalCycles)
                 Utils::buzz(3);
 
-            startTime = currentMillis;
-            while (currentMillis < startTime + (padding * 1000))
+            startTime = StateManager::State.currentMillis;
+            while (StateManager::State.currentMillis < startTime + (padding * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());

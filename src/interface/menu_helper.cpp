@@ -120,9 +120,9 @@ namespace MenuUI
         gLCD.setCursor(11, 0);
         gLCD.write(TANK_TEMP_ICON_ADDR);
 
-        if ((currentMillis - BatteryMonitor::lastBatteryCheckTime > BATT_CHECK_PERIOD * 60 * 1000) || BatteryMonitor::lastBatteryCheckTime == 0)
+        if ((StateManager::State.currentMillis - BatteryMonitor::lastBatteryCheckTime > BATT_CHECK_PERIOD * 60 * 1000) || BatteryMonitor::lastBatteryCheckTime == 0)
         {
-            BatteryMonitor::lastBatteryCheckTime = currentMillis; // Reset timer to check battery.
+            BatteryMonitor::lastBatteryCheckTime = StateManager::State.currentMillis; // Reset timer to check battery.
             pickBattIcon();
         }
         printTempReadings(TempSensors::getTankTemp());

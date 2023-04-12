@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "../../debugUtils.h"
 #include "../../globals.h"
+#include "state_manager.hpp"
 
 namespace BatteryMonitor
 {

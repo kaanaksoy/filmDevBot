@@ -104,6 +104,4 @@
 /*                              Global variables                              */
 /* -------------------------------------------------------------------------- */
 
-extern unsigned long currentMillis;
-
 #endif

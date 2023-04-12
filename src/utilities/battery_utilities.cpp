@@ -9,7 +9,7 @@ namespace BatteryMonitor
     {
         analogReference(EXTERNAL);
         DEBUG_PRINT("Reading from AREF EXTERNAL");
-        lastBatteryCheckTime = currentMillis;
+        lastBatteryCheckTime = StateManager::State.currentMillis;
     }
 
     // Returns in which range the battery charge level is.
@@ -17,7 +17,7 @@ namespace BatteryMonitor
     {
 
         int voltageRead = analogRead(BATTERY_SENSE_PIN); // Read battery value.
-        lastBatteryCheckTime = currentMillis;
+        lastBatteryCheckTime = StateManager::State.currentMillis;
 
         if (voltageRead >= FULL_CHARGE_THRESHOLD)
         {

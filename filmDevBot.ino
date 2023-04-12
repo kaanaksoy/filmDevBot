@@ -1,8 +1,14 @@
+/*
+  Film Development Bot
+  - Automates your film development using AP Tanks.
+*/
+
 // #define DEBUG // Uncomment to turn on debug statements.
 #include <ArduinoTrace.h>
 #include <LCD_I2C.h>
 
-// -- Headers --
+/* --------------------------------- Headers -------------------------------- */
+
 #include "globals.h" // Global variables
 
 #include "src/utilities/state_manager.hpp"
@@ -15,14 +21,7 @@
 #include "src/film_development/develop_film.hpp"
 #include "src/utilities/battery_utilities.hpp"
 
-/*
-  Film Development Bot
-  - Automates your film development using AP Tanks.
-*/
-
-unsigned long currentMillis = millis();
-
-// ------------ SETUP -------------
+/* ---------------------------------- SETUP --------------------------------- */
 void setup()
 {
 
@@ -30,7 +29,7 @@ void setup()
   Serial.begin(9600);
 #endif
 
-  currentMillis = millis();
+  StateManager::State.currentMillis = millis();
   SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
 
   BatteryMonitor::initBatteryChargeMeasurement();
@@ -51,11 +50,12 @@ void setup()
   pinMode(ENC_SW, INPUT);
 }
 
-// ------------ LOOP -------------
+/* ---------------------------------- LOOP ---------------------------------- */
+
 void loop()
 {
 
-  currentMillis = millis();
+  StateManager::State.currentMillis = millis();
 
   if (StateManager::State.ledInUse)
     StatusLED::blink();

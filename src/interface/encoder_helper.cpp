@@ -12,10 +12,10 @@ namespace SystemEncoder
 
         if (digitalRead(ENC_SW) == LOW && prevCommand != EncoderExit)
         {
-            timeNow = currentMillis;
+            timeNow = StateManager::State.currentMillis;
             while (digitalRead(ENC_SW) == LOW)
             {
-                if (currentMillis - timeNow > LONG_PRESS_DUR)
+                if (StateManager::State.currentMillis - timeNow > LONG_PRESS_DUR)
                 {
                     command = EncoderExit;
                     Utils::buzz(2);
