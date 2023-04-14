@@ -49,6 +49,15 @@
 #define LCD_COLS 16
 #define LCD_ROWS 2
 
+// Locations to store the custom icons on the HITACHI driver for 16X02 LCD displays.
+//  for more information please check createChar() documentation
+#define LEFT_ARR_ICON_ADDR (char)60  // character built into LCD driver.
+#define RIGHT_ARR_ICON_ADDR (char)62 // char built into LCD driver.
+#define ENTER_ICON_ADDR 2
+#define EXIT_ICON_ADDR 4
+#define TANK_TEMP_ICON_ADDR 5
+#define BATT_CHAR_ADDR 6
+
 /* ------------------------------ Motor Control ----------------------------- */
 /* Motor Driver Pins, based on the mini L298 motor driver, change to suit your
     needs.

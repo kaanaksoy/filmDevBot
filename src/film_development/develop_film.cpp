@@ -103,7 +103,7 @@ namespace DevelopFilm
 
         Display::gLCD.print("Dev Finished");
         Display::gLCD.setCursor(0, 1);
-        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
+        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
         Display::gLCD.setCursor(0, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(2, 1);
@@ -132,7 +132,7 @@ namespace DevelopFilm
         Display::readyDisplay();
         Display::gLCD.print("Process Finished");
         Display::gLCD.setCursor(0, 1);
-        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterChar);
+        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
         Display::gLCD.setCursor(3, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(5, 1);
