@@ -31,8 +31,8 @@
 /*                             Constants Interface                            */
 /* -------------------------------------------------------------------------- */
 
-#define BUZZER 5
-#define RED_LED_PIN 7
+#define BUZZER 12
+#define RED_LED_PIN 8
 // Adjust to change how fast the LED blinks.
 #define BLINK_PERIOD 1000
 
@@ -40,7 +40,7 @@
 
 // Number of LEDs connected in series
 #define NUM_LEDS 1
-#define RGB_LED_PIN 12
+#define RGB_LED_PIN 9
 // (0-255) Sets max brightness
 #define STATUS_LED_BRIGHTNESS 50
 
@@ -63,10 +63,10 @@
     needs.
 */
 
-#define AGITATE_MOT_1 8
-#define AGITATE_MOT_2 9
-#define VIBRATE_MOT_1 10
-#define VIBRATE_MOT_2 11
+#define AGITATE_MOT_1 5
+#define AGITATE_MOT_2 6
+#define VIBRATE_MOT_1 11
+#define VIBRATE_MOT_2 10
 
 // The PWM value for the vibrate motor, use it to set your vibrate motor speed (0 - 255)
 #define VIBRATE_PWM
@@ -76,9 +76,9 @@
 /* --------------------------------- Encoder -------------------------------- */
 
 // Encoder In A
-#define ENC_DT 3
-// Encoder In B
 #define ENC_CLK 2
+// Encoder In B
+#define ENC_DT 3
 // Encoder Button
 #define ENC_SW 4
 // Encoder button long press duration
@@ -87,7 +87,7 @@
 /* --------------------------------- Sensors -------------------------------- */
 
 // Data wire is plugged into port 6 on the Arduino
-#define ONE_WIRE_BUS_PIN 6
+#define ONE_WIRE_BUS_PIN 7
 
 /* -------------------------------------------------------------------------- */
 /*                         Battery Charge Measurement                         */
