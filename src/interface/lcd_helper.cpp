@@ -2,13 +2,13 @@
 
 namespace Display
 {
-    LCD_I2C gLCD(LCD_ADDR, LCD_COLS, LCD_ROWS);
+    hd44780_I2Cexp gLCD;
 
     // Initialization for the display
     void initDisplay()
     {
-        gLCD.begin();
-        gLCD.backlight();
+        gLCD.begin(LCD_COLS, LCD_ROWS);
+        gLCD.clear();
     }
 
     /*
@@ -23,11 +23,9 @@ namespace Display
     // Create and store custom chars on LCD driver memory.
     void initCustomChars()
     {
-        // gLCD.createChar_P(LEFT_ARR_ICON_ADDR, Icons::leftArrowChar);
-        gLCD.createChar_P(ENTER_ICON_ADDR, Icons::enterCustomChar);
-        // gLCD.createChar_P(RIGHT_ARR_ICON_ADDR, Icons::rightArrowChar);
-        gLCD.createChar_P(EXIT_ICON_ADDR, Icons::exitCustomChar);
-        gLCD.createChar_P(TANK_TEMP_ICON_ADDR, Icons::tankTempCustomChar);
+        gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
+        gLCD.createChar(EXIT_ICON_ADDR, Icons::exitCustomChar);
+        gLCD.createChar(TANK_TEMP_ICON_ADDR, Icons::tankTempCustomChar);
         pickBatteryIcon();
     }
 
@@ -36,30 +34,22 @@ namespace Display
     */
     void pickBatteryIcon()
     {
-        static BatteryMonitor::batteryLevelType prevChargeLevel = BatteryMonitor::batteryLevelType::FullCharge;
-        BatteryMonitor::batteryLevelType newChargeLevel = BatteryMonitor::measureChargeLevel();
-
-        if (prevChargeLevel == newChargeLevel)
+        switch (State.batteryLevel)
         {
-            return;
-        }
-
-        switch (BatteryMonitor::measureChargeLevel())
-        {
-        case BatteryMonitor::batteryLevelType::BatteryDisconnected:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::batteryDisconnectedCustomChar);
+        case ChargeLevelType::BatteryDisconnected:
+            gLCD.createChar(BATT_CHAR_ADDR, Icons::batteryDisconnectedCustomChar);
             break;
-        case BatteryMonitor::batteryLevelType::FullCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::fullBatteryCustomChar);
+        case ChargeLevelType::FullCharge:
+            gLCD.createChar(BATT_CHAR_ADDR, Icons::fullBatteryCustomChar);
             break;
-        case BatteryMonitor::batteryLevelType::MidCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::midBatteryCustomChar);
+        case ChargeLevelType::MidCharge:
+            gLCD.createChar(BATT_CHAR_ADDR, Icons::midBatteryCustomChar);
             break;
-        case BatteryMonitor::batteryLevelType::LowCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::lowBatteryCustomChar);
+        case ChargeLevelType::LowCharge:
+            gLCD.createChar(BATT_CHAR_ADDR, Icons::lowBatteryCustomChar);
             break;
-        case BatteryMonitor::batteryLevelType::VeryLowCharge:
-            gLCD.createChar_P(BATT_CHAR_ADDR, Icons::veryLowBatteryCustomChar);
+        case ChargeLevelType::VeryLowCharge:
+            gLCD.createChar(BATT_CHAR_ADDR, Icons::veryLowBatteryCustomChar);
             break;
         default:
             break;

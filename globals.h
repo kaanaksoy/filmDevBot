@@ -1,6 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
-
+#include <Arduino.h>
 /* -------------------------------------------------------------------------- */
 /*                             Global constants                             */
 /*                                                                            */
@@ -39,10 +39,10 @@
 /* ---------------------- RGB LED with FastLED Library ---------------------- */
 
 // Number of LEDs connected in series
-#define NUM_LEDS 1
+#define NUM_LEDS 35
 #define RGB_LED_PIN 9
 // (0-255) Sets max brightness
-#define STATUS_LED_BRIGHTNESS 50
+#define LED_BRIGHTNESS 35
 
 // Default LCD Address that matches my unit. Change for your module.
 #define LCD_ADDR 0x27
@@ -53,9 +53,9 @@
 //  for more information please check createChar() documentation
 #define LEFT_ARR_ICON_ADDR (char)60  // character built into LCD driver.
 #define RIGHT_ARR_ICON_ADDR (char)62 // char built into LCD driver.
-#define ENTER_ICON_ADDR 2
-#define EXIT_ICON_ADDR 4
-#define TANK_TEMP_ICON_ADDR 5
+#define ENTER_ICON_ADDR 1
+#define EXIT_ICON_ADDR 2
+#define TANK_TEMP_ICON_ADDR 3
 #define BATT_CHAR_ADDR 6
 
 /* ------------------------------ Motor Control ----------------------------- */
@@ -93,26 +93,75 @@
 /*                         Battery Charge Measurement                         */
 /* -------------------------------------------------------------------------- */
 
-#define BATTERY_SENSE_PIN A0
+#define POWEROFF_PIN 13
 
+#define BATT_SENSE_PIN A0
+#define VREF 1071             // Reference voltage on pin 21 of ATMEGA. Please change this to match yours.
+#define CONVERSION_COEFF 2325 // Coefficient required to convert the 10-bit analogRead value to a voltage value.
 // Adjust this constant to change how often battery is checked (in minutes).
-#define BATT_CHECK_PERIOD 2
+#define BATT_CHECK_PERIOD 250 // 120000
+/* The following thresholds are based on the dischage graph for the specific
+    batteries used They may be incorrect for other batteries.
 
-/* The following thresholds are based on experimentation with the specific
-    ATMEGA Chip used in development. They may be inaccurate in other instances.
+    Please refer to your battery's datasheet to modify the values
 
-    In my case the values are best defined by the function:
-        voltageRead = 212.365(batteryVoltage) + 140.332
 */
-#define FULL_CHARGE_THRESHOLD 950
-#define MID_CHARGE_THRESHOLD 870
-#define LOW_CHARGE_THRESHOLD 780
+#define FULL_CHARGE_FLOOR 385            // 3.85 volts
+#define MID_CHARGE_FLOOR 358             // 3.58 volts
+#define LOW_CHARGE_FLOOR 350             // 3.5 volts
+#define VERY_LOW_CHARGE_FLOOR 250        // 2.5 volts
+#define BATTERY_DISCONNECTED_CEILING 125 // 1.25 volts. No BMS should allow a lithium battery to get this low.
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------------- */
+/*                              Global Types                                  */
+/* -------------------------------------------------------------------------- */
+enum OperationStateType
+{
+    IDLE,
+    DEVELOPING,
+    MONITORING
+};
+enum ChargeLevelType
+{
+    FullCharge,
+    MidCharge,
+    LowCharge,
+    VeryLowCharge,
+    BatteryDisconnected
+};
+// Define Encoder Navigation types
+enum EncoderInputType
+{
+    EncoderNone,
+    EncoderLeft,
+    EncoderRight,
+    EncoderEnter,
+    EncoderExit
+};
+struct StateType
+{
+    // State variable
+    OperationStateType currentState;
+    // Make sure that no function can use the led if another function is doing so.
+    bool ledInUse;
+    // Follows LED
+    bool buzzerInUse;
+    // Track global time. updated every loop of the main loop.
+    unsigned long currentMillis;
+    // Record battery status
+    ChargeLevelType batteryLevel;
+    // Keep track of encoder state
+    EncoderInputType encoderStatus;
+    // Flag for encoder interrupt routine (true if moved)
+    bool checkEncoder;
+};
 /* -------------------------------------------------------------------------- */
 /*                              Global variables                              */
 /* -------------------------------------------------------------------------- */
+
+extern StateType State;
 
 #endif

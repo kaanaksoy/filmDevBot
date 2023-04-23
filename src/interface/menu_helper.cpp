@@ -65,6 +65,7 @@ namespace MenuUI
             Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
         }
 
+        Display::pickBatteryIcon();
         Display::gLCD.setCursor(0, 0);
         Display::gLCD.write(BATT_CHAR_ADDR);
         Display::gLCD.setCursor(5, 1);
@@ -73,12 +74,6 @@ namespace MenuUI
         Display::gLCD.write(EXIT_ICON_ADDR);
         Display::gLCD.setCursor(11, 0);
         Display::gLCD.write(TANK_TEMP_ICON_ADDR);
-
-        if ((StateManager::State.currentMillis - BatteryMonitor::lastBatteryCheckTime > BATT_CHECK_PERIOD * 60 * 1000) || BatteryMonitor::lastBatteryCheckTime == 0)
-        {
-            BatteryMonitor::lastBatteryCheckTime = StateManager::State.currentMillis; // Reset timer to check battery.
-            Display::pickBatteryIcon();
-        }
         printTempReadings(TempSensors::getTankTemp());
     }
 

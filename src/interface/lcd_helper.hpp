@@ -1,7 +1,10 @@
 #ifndef LCD_HELPER_HPP
 
 /* -------------------------------- Libraries ------------------------------- */
-#include <LCD_I2C.h>
+#include <Wire.h>
+#include <hd44780.h>
+#include <hd44780ioClass/hd44780_I2Cexp.h>
+
 /* --------------------------------- Headers -------------------------------- */
 #include "../../globals.h"
 #include "../resources/icons.hpp"
@@ -9,8 +12,7 @@
 
 namespace Display
 {
-    extern LCD_I2C gLCD;
-
+    extern hd44780_I2Cexp gLCD;
     // Initialization for the display
     void initDisplay();
 
@@ -21,7 +23,7 @@ namespace Display
     void initCustomChars();
 
     /* Due to Hitachi driver constraints on custom chars, battery indicator is
-        re-creatred as necessary
+        re-created as necessary
     */
     void pickBatteryIcon();
 

@@ -3,24 +3,13 @@
 #include <Arduino.h>
 #include "../../debugUtils.h"
 #include "../../globals.h"
-#include "state_manager.hpp"
 
 namespace BatteryMonitor
 {
-    extern unsigned long lastBatteryCheckTime;
-
-    enum batteryLevelType
-    {
-        FullCharge,
-        MidCharge,
-        LowCharge,
-        VeryLowCharge,
-        BatteryDisconnected
-    };
     void initBatteryChargeMeasurement();
 
     // Returns in which range the battery charge level is.
-    batteryLevelType measureChargeLevel();
+    void updateChargeLevel(ChargeLevelType prevChargeLevel);
 
     void powerOff();
 } // namespace BatteryWatcher

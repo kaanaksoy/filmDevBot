@@ -2,9 +2,7 @@
 
 namespace StateManager
 {
-    StateType State = {IDLE, false, false, millis()};
-
-    void setState(OperationStateType newState)
+    void setOperationState(OperationStateType newState)
     {
 #ifdef DEBUG
         DEBUG_PRINT("State Was: ");

@@ -3,41 +3,54 @@
 
 namespace BatteryMonitor
 {
-    unsigned long lastBatteryCheckTime = 0;
 
     void initBatteryChargeMeasurement()
     {
-        analogReference(EXTERNAL);
-        DEBUG_PRINT("Reading from AREF EXTERNAL");
-        lastBatteryCheckTime = StateManager::State.currentMillis;
+        analogReference(INTERNAL);
+        DEBUG_PRINT("Reading from AREF INTERNAL");
+        updateChargeLevel(State.batteryLevel);
     }
 
     // Returns in which range the battery charge level is.
-    batteryLevelType measureChargeLevel()
+    void updateChargeLevel(ChargeLevelType prevChargeLevel)
     {
+        static unsigned long lastBatteryCheckTime;
 
-        int voltageRead = analogRead(BATTERY_SENSE_PIN); // Read battery value.
-        lastBatteryCheckTime = StateManager::State.currentMillis;
+        // Return if we don't need to update the battery level.
+        if (State.currentMillis < lastBatteryCheckTime + BATT_CHECK_PERIOD)
+        {
+            return;
+        }
 
-        if (voltageRead == 0)
+        // Calculatesthe battery voltage.
+        // Conversion coefficient is required to convert the voltage based on the voltage divider used.
+        unsigned long voltageRead = (unsigned long)analogRead(BATT_SENSE_PIN) * VREF / CONVERSION_COEFF;
+        lastBatteryCheckTime = State.currentMillis;
+
+        if (voltageRead >= FULL_CHARGE_FLOOR)
         {
-            return BatteryDisconnected;
+            State.batteryLevel = FullCharge;
+            return;
         }
-        else if (voltageRead >= FULL_CHARGE_THRESHOLD)
+        else if (voltageRead >= MID_CHARGE_FLOOR)
         {
-            return FullCharge;
+            State.batteryLevel = MidCharge;
+            return;
         }
-        else if (voltageRead >= MID_CHARGE_THRESHOLD)
+        else if (voltageRead >= LOW_CHARGE_FLOOR)
         {
-            return MidCharge;
+            State.batteryLevel = LowCharge;
+            return;
         }
-        else if (voltageRead >= LOW_CHARGE_THRESHOLD)
+        else if (voltageRead >= VERY_LOW_CHARGE_FLOOR)
         {
-            return LowCharge;
+            State.batteryLevel = VeryLowCharge;
+            return;
         }
-        else
+        else if (voltageRead <= BATTERY_DISCONNECTED_CEILING)
         {
-            return VeryLowCharge;
+            State.batteryLevel = BatteryDisconnected;
+            return;
         }
     }
 

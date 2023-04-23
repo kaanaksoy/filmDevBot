@@ -6,15 +6,16 @@ namespace DevelopFilm
     void ColorC41()
     {
         DEBUG_PRINT("ColorC41(): Started now.")
-        StateManager::setState(StateManager::DEVELOPING);
+        StateManager::setOperationState(OperationStateType::DEVELOPING);
 
         int8_t pushPullValue = 0;
         uint16_t duration;
 
         Display::readyDisplay();
         Display::gLCD.print("C-41 Development");
-        SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
-        while (command != SystemEncoder::EncoderEnter)
+        EncoderInputType command;
+        bool await = true;
+        while (await)
         {
             Display::gLCD.setCursor(0, 1);
             // manually adding sign & usign abs allows the text to not expand and shrink when it becomes positive or negative.
@@ -25,25 +26,30 @@ namespace DevelopFilm
             command = SystemEncoder::getCommand(command); // Determine command.
             switch (command)
             {
-            case SystemEncoder::EncoderLeft:
+            case EncoderEnter:
+                Utils::buzz(5);
+                await = false;
+                break;
+            case EncoderLeft:
                 pushPullValue--;
                 if (pushPullValue < MAX_PULL)
                     pushPullValue = MAX_PULL;
                 break;
-            case SystemEncoder::EncoderRight:
+            case EncoderRight:
                 pushPullValue++;
                 if (pushPullValue > MAX_PUSH)
                     pushPullValue = MAX_PUSH;
                 break;
-            case SystemEncoder::EncoderExit:
-                StateManager::setState(StateManager::IDLE);
+            case EncoderExit:
+                break;
+                StateManager::setOperationState(OperationStateType::IDLE);
                 return;
-            case SystemEncoder::EncoderNone:
+            case EncoderNone:
             default:
                 break;
             }
-            delay(400);
         }
+        delay(400);
 
         Display::readyDisplay();
 
@@ -81,11 +87,11 @@ namespace DevelopFilm
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
-        case SystemEncoder::EncoderEnter:
+        case EncoderEnter:
             /* code */
             break;
-        case SystemEncoder::EncoderExit:
-            StateManager::setState(StateManager::IDLE);
+        case EncoderExit:
+            StateManager::setOperationState(OperationStateType::IDLE);
             return;
         default:
             break;
@@ -103,8 +109,6 @@ namespace DevelopFilm
 
         Display::gLCD.print("Dev Finished");
         Display::gLCD.setCursor(0, 1);
-        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
-        Display::gLCD.setCursor(0, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(2, 1);
         Display::gLCD.print("to strt fixing");
@@ -113,11 +117,11 @@ namespace DevelopFilm
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
-        case SystemEncoder::EncoderEnter:
+        case EncoderEnter:
             /* code */
             break;
-        case SystemEncoder::EncoderExit:
-            StateManager::setState(StateManager::IDLE);
+        case EncoderExit:
+            StateManager::setOperationState(OperationStateType::IDLE);
             return;
         default:
             break;
@@ -131,8 +135,6 @@ namespace DevelopFilm
 
         Display::readyDisplay();
         Display::gLCD.print("Process Finished");
-        Display::gLCD.setCursor(0, 1);
-        Display::gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
         Display::gLCD.setCursor(3, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(5, 1);
@@ -140,32 +142,32 @@ namespace DevelopFilm
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
-        case SystemEncoder::EncoderEnter:
+        case EncoderEnter:
             /* code */
             break;
-        case SystemEncoder::EncoderExit:
-            StateManager::setState(StateManager::IDLE);
+        case EncoderExit:
+            StateManager::setOperationState(OperationStateType::IDLE);
             return;
         default:
             break;
         }
 
-        StateManager::setState(StateManager::IDLE);
+        StateManager::setOperationState(OperationStateType::IDLE);
         return;
     }
 
     void ColorE6()
     {
-        StateManager::setState(StateManager::DEVELOPING);
+        StateManager::setOperationState(OperationStateType::DEVELOPING);
         // StatusLED::blink(5);
-        StateManager::setState(StateManager::IDLE);
+        StateManager::setOperationState(OperationStateType::IDLE);
         return;
     }
 
     void BWCustom()
     {
-        StateManager::setState(StateManager::DEVELOPING);
-        StateManager::setState(StateManager::IDLE);
+        StateManager::setOperationState(OperationStateType::DEVELOPING);
+        StateManager::setOperationState(OperationStateType::IDLE);
         return;
     }
 
@@ -201,12 +203,12 @@ namespace DevelopFilm
             break;
         }
 
-        motorStartMillis = StateManager::State.currentMillis;
+        motorStartMillis = State.currentMillis;
         motorRunning = true;
 
         while (motorRunning)
         {
-            if (StateManager::State.currentMillis > motorStartMillis + (duration * 1000))
+            if (State.currentMillis > motorStartMillis + (duration * 1000))
             {
                 analogWrite(AGITATE_MOT_1, 0);
                 analogWrite(AGITATE_MOT_2, 0);
@@ -235,14 +237,14 @@ namespace DevelopFilm
         for (int count = 0; count < 4; count++)
         {
             DEBUG_PRINT(String("Vibrated ") + count + String(" time(s)."));
-            motorStartTime = StateManager::State.currentMillis;
+            motorStartTime = State.currentMillis;
             analogWrite(VIBRATE_MOT_1, 255);
             analogWrite(VIBRATE_MOT_2, 0);
             motorRunning = true;
 
             while (motorRunning)
             {
-                if (StateManager::State.currentMillis > motorStartTime + 1000)
+                if (State.currentMillis > motorStartTime + 1000)
                 {
                     analogWrite(VIBRATE_MOT_1, 0);
                     analogWrite(VIBRATE_MOT_2, 0);
@@ -251,10 +253,10 @@ namespace DevelopFilm
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
             }
-            motorRunning = StateManager::State.currentMillis;
+            motorRunning = State.currentMillis;
             while (!motorRunning)
             {
-                if (StateManager::State.currentMillis > motorRunning + 500)
+                if (State.currentMillis > motorRunning + 500)
                     motorRunning = true;
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -293,9 +295,9 @@ namespace DevelopFilm
         {
             DEBUG_PRINT(String("develop(): Cycle ") + cycleCount + String("started. "));
 
-            startTime = StateManager::State.currentMillis;
+            startTime = State.currentMillis;
 
-            while (StateManager::State.currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
+            while (State.currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
@@ -307,8 +309,8 @@ namespace DevelopFilm
             if (cycleCount + 2 >= totalCycles)
                 Utils::buzz(3);
 
-            startTime = StateManager::State.currentMillis;
-            while (StateManager::State.currentMillis < startTime + (padding * 1000))
+            startTime = State.currentMillis;
+            while (State.currentMillis < startTime + (padding * 1000))
             {
                 TempSensors::requestTankTemp();
                 MenuUI::printTempReadings(TempSensors::getTankTemp());

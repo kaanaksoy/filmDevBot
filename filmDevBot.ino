@@ -22,6 +22,13 @@
 #include "src/utilities/battery_utilities.hpp"
 #include "src/interface/lcd_helper.hpp"
 
+StateType State = {
+    OperationStateType::IDLE,
+    false,
+    false,
+    millis(),
+    ChargeLevelType::FullCharge};
+
 /* ---------------------------------- SETUP --------------------------------- */
 void setup()
 {
@@ -30,12 +37,11 @@ void setup()
   Serial.begin(9600);
 #endif
 
-  StateManager::State.currentMillis = millis();
-  SystemEncoder::EncoderInputType command = SystemEncoder::EncoderNone;
-
-  BatteryMonitor::initBatteryChargeMeasurement();
   Display::initDisplay();
   MenuUI::createMenu();
+  SystemEncoder::initEncoder();
+  EncoderInputType command = EncoderNone;
+  BatteryMonitor::initBatteryChargeMeasurement();
   TempSensors::initializeTempSensor();
 
   // Initialize motor control pins.
@@ -56,9 +62,10 @@ void setup()
 void loop()
 {
 
-  StateManager::State.currentMillis = millis();
+  State.currentMillis = millis();
+  BatteryMonitor::updateChargeLevel(State.batteryLevel);
 
-  if (StateManager::State.ledInUse)
+  if (State.ledInUse)
     StatusLED::blink();
 
   int fid = 0; // Function ID
@@ -67,25 +74,25 @@ void loop()
   const char *info;
   bool layerChanged = false; // Should navigate layers?
 
-  switch (StateManager::State.currentState)
+  switch (State.currentState)
   {
-  case StateManager::IDLE:
-    SystemEncoder::EncoderInputType command = SystemEncoder::getCommand(command);
+  case IDLE:
+    EncoderInputType command = SystemEncoder::getCommand(command);
     // Call menu methods based on command selection
     switch (command)
     {
-    case SystemEncoder::EncoderExit:
+    case EncoderExit:
       MenuUI::gMenu.exit();
       break;
-    case SystemEncoder::EncoderEnter:
+    case EncoderEnter:
       MenuUI::gMenu.enter(layerChanged);
       break;
-    case SystemEncoder::EncoderLeft:
+    case EncoderLeft:
       MenuUI::gMenu.left();
       break;
-    case SystemEncoder::EncoderRight:
+    case EncoderRight:
       MenuUI::gMenu.right();
-    case SystemEncoder::EncoderNone:
+    case EncoderNone:
     default:
       break;
     }
@@ -94,13 +101,13 @@ void loop()
       Print/update the menu when commanded.
       get the current function ID.
     */
-    if (SystemEncoder::EncoderNone != command)
+    if (EncoderNone != command)
     {
       fid = MenuUI::gMenu.getInfo(info);
       MenuUI::printMenuEntry(info);
 
       // Do action regarding fid
-      if ((0 != fid) && (command == SystemEncoder::EncoderEnter) && (!layerChanged))
+      if ((0 != fid) && (command == EncoderEnter) && (!layerChanged))
       {
         switch (fid)
         {
@@ -123,15 +130,15 @@ void loop()
 
     break;
 
-  case StateManager::DEVELOPING:
+  case DEVELOPING:
 
     TempSensors::requestTankTemp();
     MenuUI::printTempReadings(TempSensors::getTankTemp());
 
     break;
 
-  case StateManager::MONITORING:
-    setState(StateManager::IDLE);
+  case MONITORING:
+    StateManager::setOperationState(IDLE);
   default:
     break;
   }

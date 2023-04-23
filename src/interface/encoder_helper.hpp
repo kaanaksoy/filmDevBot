@@ -1,31 +1,21 @@
 #ifndef ENCODER_HELPER_HPP
 #define ENCODER_HELPER_HPP
 
-// Libraries
-#include <Encoder.h>
-
 // Header Files
 #include "../../globals.h"
 #include "../utilities/general_utilities.hpp"
 
 namespace SystemEncoder
 {
-    extern Encoder gEncoder; // Initialize Encoder
+    // Initialize Encoder
+    void initEncoder();
 
-    // Define Encoder Navigation types
-    enum EncoderInputType
-    {
-        EncoderNone,
-        EncoderLeft,
-        EncoderRight,
-        EncoderEnter,
-        EncoderExit
-    };
+    void enc_ISR();
+
+    EncoderInputType encoderAwaitConfirm();
 
     // --- getCommand | Menu Navigation Function ---
     EncoderInputType getCommand(EncoderInputType prevCommand);
-
-    EncoderInputType encoderAwaitConfirm();
 } // namespace Encoder
 
 #endif
