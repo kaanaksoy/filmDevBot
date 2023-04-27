@@ -16,6 +16,22 @@
 
 namespace DevelopFilm
 {
+  // Strings
+  const char p_C41[] PROGMEM = "C-41";
+  const char p_E6[] PROGMEM = "E-6";
+  const char p_BW[] PROGMEM = "B&W";
+  const char p_Custom[] PROGMEM = "Custom";
+
+  const char p_psh[] PROGMEM = "Psh";
+  const char p_pll[] PROGMEM = "Pll";
+
+  const char p_toStrt[] PROGMEM = "To Start";
+  const char p_running[] PROGMEM = "Running";
+  const char p_finsihed[] PROGMEM = "Finished";
+  const char p_fixing[] PROGMEM = "Fixing";
+  const char p_dev[] PROGMEM = "Dev";
+  const char p_toExit[] PROGMEM = "To Exit";
+
   // --- ColorC41 | Film Development Functions ---
   void ColorC41();
 

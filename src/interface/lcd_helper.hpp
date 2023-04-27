@@ -27,6 +27,9 @@ namespace Display
     */
     void pickBatteryIcon();
 
+    // Basic function to print strings from an array in progmem.
+    inline void glcdPrint_P(const char *const *stringTableMember) __attribute__((always_inline));
+
 } // namespace Display
 
 #define LCD_HELPER_HPP

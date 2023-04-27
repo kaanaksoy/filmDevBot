@@ -56,4 +56,11 @@ namespace Display
         }
     }
 
+    // Compact function to allow printing from a sting array in progmem to the lcd
+    void glcdPrint_P(const char *const *stringTableMember)
+    {
+        strcpy_P(tmpStr, (char *)pgm_read_word((stringTableMember))); // Necessary casts and dereferencing, just copy.
+        gLCD.print(tmpStr);
+    }
+
 } // namespace Display

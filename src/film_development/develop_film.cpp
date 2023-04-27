@@ -5,30 +5,30 @@ namespace DevelopFilm
     // --- ColorC41 | Film Development Functions ---
     void ColorC41()
     {
-        DEBUG_PRINT("ColorC41(): Started now.")
+        DEBUG_PRINT(F("C41Strtnow"))
         StateManager::setOperationState(OperationStateType::DEVELOPING);
 
         int8_t pushPullValue = 0;
         uint16_t duration;
 
         Display::readyDisplay();
-        Display::gLCD.print("C-41 Development");
-        EncoderInputType command;
-        bool await = true;
-        while (await)
+        sprintf_P(tmpStr, PSTR("%S %S"), p_C41, p_dev);
+        Display::gLCD.print(tmpStr);
+        EncoderInputType command = EncoderNone;
+
+        while (command != EncoderEnter)
         {
-            Display::gLCD.setCursor(0, 1);
-            // manually adding sign & usign abs allows the text to not expand and shrink when it becomes positive or negative.
-            Display::gLCD.print(
-                String("Psh/Pll: ") +
-                (0 > pushPullValue ? "-" : "+") +
-                String(abs(pushPullValue)));
             command = SystemEncoder::getCommand(command); // Determine command.
+            Display::gLCD.setCursor(0, 1);
+
+            // manually adding sign & usign abs allows the text to not expand and shrink when it becomes positive or negative.
+            sprintf_P(tmpStr, PSTR("%S/%S: %s%d"), p_psh, p_pll, (0 > pushPullValue ? "-" : "+"), abs(pushPullValue));
+            Display::gLCD.print(tmpStr);
+
             switch (command)
             {
             case EncoderEnter:
                 Utils::buzz(5);
-                await = false;
                 break;
             case EncoderLeft:
                 pushPullValue--;
@@ -49,41 +49,23 @@ namespace DevelopFilm
                 break;
             }
         }
-        delay(400);
+        delay(1);
 
         Display::readyDisplay();
 
-        switch (pushPullValue)
-        {
-        case -1:
-            duration = PULL_ONE_DEV_DUR;
-            Display::gLCD.print("C-41, -1 Pull");
-            break;
-        case 0:
-            duration = STD_DEV_DUR;
-            Display::gLCD.print("C-41, +0 Push");
-            break;
-        case 1:
-            duration = PUSH_ONE_DEV_DUR;
-            Display::gLCD.print("C-41, +1 Push");
-            break;
-        case 2:
-            duration = PUSH_TWO_DEV_DUR;
-            Display::gLCD.print("C-41, +2 Push");
-            break;
-        case 3:
-            duration = PUSH_THR_DEV_DUR;
-            Display::gLCD.print("C-41, +3 Push");
-            break;
-        default:
-            break;
-        }
+        sprintf_P(tmpStr, PSTR("%S, %s%d %S"),
+                  p_C41,
+                  (0 > pushPullValue ? "-" : "+"),
+                  abs(pushPullValue),
+                  (0 > pushPullValue ? p_pll : p_pll));
+        Display::gLCD.print(tmpStr);
 
         Display::gLCD.setCursor(0, 1);
         Display::gLCD.setCursor(3, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(5, 1);
-        Display::gLCD.print("to start...");
+        sprintf_P(tmpStr, PSTR("%S"), p_toStrt);
+        Display::gLCD.print(tmpStr);
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
@@ -98,22 +80,25 @@ namespace DevelopFilm
         }
 
         Display::readyDisplay();
-        Display::gLCD.print("Running.");
+        sprintf_P(tmpStr, PSTR("%S, %S"), p_running, p_dev);
+        Display::gLCD.print(tmpStr);
         Display::gLCD.setCursor(11, 0);
         Display::gLCD.write(TANK_TEMP_ICON_ADDR);
 
         develop(duration, 10, 6, 30);
-        DEBUG_PRINT("ColorC41(): Just finished developing");
+        DEBUG_PRINT(F("C41findev"));
 
         Display::readyDisplay();
 
-        Display::gLCD.print("Dev Finished");
+        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
+        Display::gLCD.print(tmpStr);
         Display::gLCD.setCursor(0, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(2, 1);
-        Display::gLCD.print("to strt fixing");
+        sprintf_P(tmpStr, "%S %S", p_toStrt, p_fixing);
+        Display::gLCD.print(tmpStr);
 
-        DEBUG_PRINT("ColorC41(): Starting Fixing.")
+        DEBUG_PRINT(F("C41StrtFix"));
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
@@ -128,17 +113,19 @@ namespace DevelopFilm
         }
 
         Display::readyDisplay();
-        Display::gLCD.print("Fixing...");
+        sprintf_P(tmpStr, PSTR("%S"), p_fixing);
+        Display::gLCD.print(tmpStr);
         Display::gLCD.setCursor(11, 0);
         Display::gLCD.write(TANK_TEMP_ICON_ADDR);
         fix(FIXING_DUR);
-
         Display::readyDisplay();
-        Display::gLCD.print("Process Finished");
+        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
+        Display::gLCD.print(tmpStr);
         Display::gLCD.setCursor(3, 1);
         Display::gLCD.write(ENTER_ICON_ADDR);
         Display::gLCD.setCursor(5, 1);
-        Display::gLCD.print("to exit...");
+        sprintf_P(tmpStr, PSTR("%S"), p_toExit);
+        Display::gLCD.print(tmpStr);
 
         switch (SystemEncoder::encoderAwaitConfirm())
         {
@@ -182,24 +169,31 @@ namespace DevelopFilm
 */
     void agitate(int duration)
     {
-        DEBUG_PRINT("Agitation started.");
+        DEBUG_PRINT("Agitstrt");
 
-        bool agitateDirectionFlag = true;
+        static bool agitateDirectionFlag = true;
         bool motorRunning = false;
         unsigned long motorStartMillis;
 
         switch (agitateDirectionFlag)
         {
         case true:
-            analogWrite(AGITATE_MOT_1, 255);
-            analogWrite(AGITATE_MOT_2, 0);
-            agitateDirectionFlag = false;
+            for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+            {
+                analogWrite(AGITATE_MOT_1, pwmVal);
+                analogWrite(AGITATE_MOT_2, 0);
+                delay(5);
+            }
+
             break;
         case false:
         default:
-            analogWrite(AGITATE_MOT_1, 0);
-            analogWrite(AGITATE_MOT_2, 255);
-            agitateDirectionFlag = true;
+            for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+            {
+                analogWrite(AGITATE_MOT_1, 0);
+                analogWrite(AGITATE_MOT_2, pwmVal);
+                delay(5);
+            }
             break;
         }
 
@@ -217,7 +211,7 @@ namespace DevelopFilm
             TempSensors::requestTankTemp();
             MenuUI::printTempReadings(TempSensors::getTankTemp());
         }
-        DEBUG_PRINT("Agitate Finished.")
+        agitateDirectionFlag = !agitateDirectionFlag;
         return;
     }
 
@@ -230,7 +224,6 @@ namespace DevelopFilm
   */
     void vibrate()
     {
-        DEBUG_PRINT("Vibrate started.");
         unsigned long motorStartTime;
         bool motorRunning;
 
@@ -264,7 +257,6 @@ namespace DevelopFilm
         }
         analogWrite(VIBRATE_MOT_2, 0);
         analogWrite(VIBRATE_MOT_1, 0);
-        DEBUG_PRINT("Vibrate Ended");
         return;
     }
 
@@ -284,17 +276,13 @@ namespace DevelopFilm
                           (agitationDurationSeconds + agitateEveryDurationSeconds);
 
         unsigned long startTime;
-        DEBUG_PRINT("develop(): started.");
         digitalWrite(RED_LED_PIN, HIGH);
 
         agitate(firstAgitationDurationSeconds);
         vibrate();
 
-        DEBUG_PRINT("develop(): completed initial cycle.")
         for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
         {
-            DEBUG_PRINT(String("develop(): Cycle ") + cycleCount + String("started. "));
-
             startTime = State.currentMillis;
 
             while (State.currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
@@ -304,7 +292,6 @@ namespace DevelopFilm
                 delay(250);
             }
             agitate(agitationDurationSeconds);
-            DEBUG_PRINT("develop(): just agitated.")
 
             if (cycleCount + 2 >= totalCycles)
                 Utils::buzz(3);
@@ -319,7 +306,6 @@ namespace DevelopFilm
             Utils::buzz(5);
         }
         digitalWrite(RED_LED_PIN, LOW);
-        DEBUG_PRINT("develop(): ending now.");
         return;
     }
     /*
@@ -328,15 +314,11 @@ namespace DevelopFilm
       */
     void fix(uint8_t fixingDurationSeconds)
     {
-        DEBUG_PRINT("fix(): started.");
-
         digitalWrite(RED_LED_PIN, HIGH);
-        DEBUG_PRINT("develop(): calling develop now.");
         develop(FIXING_DUR, 10, 7, 30);
 
         Utils::buzz(6);
         digitalWrite(RED_LED_PIN, LOW);
-        DEBUG_PRINT("develop(): ending now.");
         return;
     }
 } // namespace DevelopFilm

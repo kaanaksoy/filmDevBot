@@ -2,46 +2,6 @@
 
 namespace SystemEncoder
 {
-    // Encoder gEncoder(ENC_DT, ENC_CLK); // Initialize Encoder
-
-    // // --- getCommand | Menu Navigation Function ---
-    // EncoderInputType getCommand(EncoderInputType prevCommand)
-    // {
-    //     EncoderInputType command = EncoderNone;
-    //     unsigned long timeNow;
-
-    //     if (digitalRead(ENC_SW) == LOW && prevCommand != EncoderExit)
-    //     {
-    //         timeNow = State.currentMillis;
-    //         while (digitalRead(ENC_SW) == LOW)
-    //         {
-    //             if (State.currentMillis - timeNow > LONG_PRESS_DUR)
-    //             {
-    //                 command = EncoderExit;
-    //                 Utils::buzz(2);
-    //                 delay(400);
-    //                 return command;
-    //             }
-    //         }
-    //         command = EncoderEnter;
-    //         Utils::buzz(1);
-    //         return command;
-    //     }
-    //     else
-    //     {
-    //         int gEncoderCurrPos = gEncoder.readAndReset();
-    //         if (0 > gEncoderCurrPos)
-    //         {
-    //             command = EncoderLeft;
-    //         }
-    //         else if (0 < gEncoderCurrPos)
-    //         {
-    //             command = EncoderRight;
-    //         }
-    //     }
-
-    //     return command;
-    // }
 
     EncoderInputType encoderAwaitConfirm()
     {
@@ -67,9 +27,6 @@ namespace SystemEncoder
         pinMode(ENC_CLK, INPUT);
         pinMode(ENC_DT, INPUT);
         pinMode(ENC_SW, INPUT_PULLUP);
-
-        attachInterrupt(digitalPinToInterrupt(ENC_CLK), enc_ISR, CHANGE);
-        attachInterrupt(digitalPinToInterrupt(ENC_DT), enc_ISR, CHANGE);
     }
 
     EncoderInputType getCommand(EncoderInputType prevCommand)
@@ -86,13 +43,12 @@ namespace SystemEncoder
 
             if (digitalRead(ENC_SW) == LOW && prevCommand == EncoderNone)
             {
-                unsigned long timeStamp = State.currentMillis;
+                unsigned long timeStamp = millis();
                 while (digitalRead(ENC_SW) == LOW)
                 {
                     if (millis() > timeStamp + LONG_PRESS_DUR)
                     {
                         Utils::buzz(2);
-                        // delay(100);
                         needDebounce = true;
                         return EncoderExit;
                     }
@@ -103,8 +59,6 @@ namespace SystemEncoder
         }
 
         // Left - Right movement of the encoder
-        State.checkEncoder = false; // Reset flag
-
         static uint8_t lrmem = 3;
         static int lrsum = 0;
         static int8_t TRANS[] = {0, -1, 1, 14, 1, 0, 14, -1, -1, 14, 0, 1, 14, 1, -1, 0};
@@ -141,10 +95,5 @@ namespace SystemEncoder
         // An impossible rotation has been detected - ignore the movement
         lrsum = 0;
         return EncoderNone;
-    }
-
-    void enc_ISR()
-    {
-        State.checkEncoder = true;
     }
 } // namespace Encoder

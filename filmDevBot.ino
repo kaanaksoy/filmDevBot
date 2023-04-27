@@ -10,7 +10,6 @@
 /* --------------------------------- Headers -------------------------------- */
 
 #include "globals.h" // Global variables
-
 #include "src/utilities/state_manager.hpp"
 #include "src/interface/encoder_helper.hpp"
 #include "debugUtils.h"
@@ -22,6 +21,7 @@
 #include "src/utilities/battery_utilities.hpp"
 #include "src/interface/lcd_helper.hpp"
 
+/* ---------------------------------- SETUP --------------------------------- */
 StateType State = {
     OperationStateType::IDLE,
     false,
@@ -29,7 +29,8 @@ StateType State = {
     millis(),
     ChargeLevelType::FullCharge};
 
-/* ---------------------------------- SETUP --------------------------------- */
+char tmpStr[STR_BUFF_LEN] = "";
+
 void setup()
 {
 

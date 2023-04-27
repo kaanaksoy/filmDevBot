@@ -9,6 +9,8 @@
 /* ---- All of the global constants, variables & pin definitions are here --- */
 /* -------------------------------------------------------------------------- */
 
+#define STR_BUFF_LEN 16
+
 /* -------------------------------------------------------------------------- */
 /*                       Constants for C-41 Development                       */
 /* -------------------------------------------------------------------------- */
@@ -76,7 +78,7 @@
 /* --------------------------------- Encoder -------------------------------- */
 
 // Encoder In A
-#define ENC_CLK 2
+#define ENC_CLK A1
 // Encoder In B
 #define ENC_DT 3
 // Encoder Button
@@ -93,7 +95,7 @@
 /*                         Battery Charge Measurement                         */
 /* -------------------------------------------------------------------------- */
 
-#define POWEROFF_PIN 13
+#define POWEROFF_PIN 2
 
 #define BATT_SENSE_PIN A0
 #define VREF 1071             // Reference voltage on pin 21 of ATMEGA. Please change this to match yours.
@@ -163,5 +165,8 @@ struct StateType
 /* -------------------------------------------------------------------------- */
 
 extern StateType State;
+
+// String to be used to print to the LCD.
+extern char tmpStr[STR_BUFF_LEN];
 
 #endif
