@@ -33,18 +33,30 @@
 /*                             Constants Interface                            */
 /* -------------------------------------------------------------------------- */
 
-#define BUZZER 12
+#define BUZZER_PIN 12
 #define RED_LED_PIN 8
 // Adjust to change how fast the LED blinks.
 #define BLINK_PERIOD 1000
 
-/* ---------------------- RGB LED with FastLED Library ---------------------- */
+/* ---------------------- RGB LED Ring with FastLED Library ---------------------- */
 
 // Number of LEDs connected in series
-#define NUM_LEDS 35
-#define RGB_LED_PIN 9
+#define NUM_LEDS 45
+#define LED_PIN 9
 // (0-255) Sets max brightness
 #define LED_BRIGHTNESS 35
+// Custom colors
+#define DIM_WHITE 0x303030
+
+// Blink Speed Options
+#define BLINK_FAST_INTERVAL 250
+#define BLINK_NORMAL_INTERVAL 1000
+#define BLINK_SLOW_INTERVAL 1000
+
+/* -------------------------- Buzzer Constants ------------------------------ */
+#define BUZZER_FAST_INTERVAL 250
+#define BUZZER_NORMAL_INTERVAL 500
+#define BUZZER_SLOW_INTERVAL 1000
 
 // Default LCD Address that matches my unit. Change for your module.
 #define LCD_ADDR 0x27
@@ -126,6 +138,13 @@ enum OperationStateType
     DEVELOPING,
     MONITORING
 };
+
+// Indicators such as the LED and the buzzer use this to indicate status
+enum IndicatorStateType
+{
+    BUSY,
+    AVAILABLE
+};
 enum ChargeLevelType
 {
     FullCharge,
@@ -148,15 +167,13 @@ struct StateType
     // State variable
     OperationStateType currentState;
     // Make sure that no function can use the led if another function is doing so.
-    bool ledInUse;
+    IndicatorStateType ledState;
     // Follows LED
-    bool buzzerInUse;
-    // Track global time. updated every loop of the main loop.
-    unsigned long currentMillis;
+    IndicatorStateType buzzerState;
     // Record battery status
     ChargeLevelType batteryLevel;
-    // Keep track of encoder state
-    EncoderInputType encoderStatus;
+    // Track global time. updated every loop of the main loop.
+    unsigned long currentMillis;
     // Flag for encoder interrupt routine (true if moved)
     bool checkEncoder;
 };

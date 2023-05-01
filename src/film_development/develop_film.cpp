@@ -5,7 +5,7 @@ namespace DevelopFilm
     // --- ColorC41 | Film Development Functions ---
     void ColorC41()
     {
-        DEBUG_PRINT(F("C41Strtnow"))
+        DEBUG_PRINT(F("C41Strtnow"));
         StateManager::setOperationState(OperationStateType::DEVELOPING);
 
         int8_t pushPullValue = 0;
@@ -28,7 +28,7 @@ namespace DevelopFilm
             switch (command)
             {
             case EncoderEnter:
-                Utils::buzz(5);
+                tone(BUZZER_PIN, 4000, 125);
                 break;
             case EncoderLeft:
                 pushPullValue--;
@@ -294,7 +294,7 @@ namespace DevelopFilm
             agitate(agitationDurationSeconds);
 
             if (cycleCount + 2 >= totalCycles)
-                Utils::buzz(3);
+                tone(BUZZER_PIN, 4000, 125);
 
             startTime = State.currentMillis;
             while (State.currentMillis < startTime + (padding * 1000))
@@ -303,7 +303,7 @@ namespace DevelopFilm
                 MenuUI::printTempReadings(TempSensors::getTankTemp());
                 delay(250);
             }
-            Utils::buzz(5);
+            tone(BUZZER_PIN, 4000, 125);
         }
         digitalWrite(RED_LED_PIN, LOW);
         return;
@@ -317,7 +317,7 @@ namespace DevelopFilm
         digitalWrite(RED_LED_PIN, HIGH);
         develop(FIXING_DUR, 10, 7, 30);
 
-        Utils::buzz(6);
+        tone(BUZZER_PIN, 4000, 125);
         digitalWrite(RED_LED_PIN, LOW);
         return;
     }

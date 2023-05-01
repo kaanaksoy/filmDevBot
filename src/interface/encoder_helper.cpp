@@ -48,12 +48,12 @@ namespace SystemEncoder
                 {
                     if (millis() > timeStamp + LONG_PRESS_DUR)
                     {
-                        Utils::buzz(2);
+                        tone(BUZZER_PIN, 4000, 125);
                         needDebounce = true;
                         return EncoderExit;
                     }
                 }
-                Utils::buzz(1);
+                tone(BUZZER_PIN, 4000, 125);
                 return EncoderEnter;
             }
         }

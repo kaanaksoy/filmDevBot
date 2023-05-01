@@ -14,8 +14,8 @@
 #include "src/interface/encoder_helper.hpp"
 #include "debugUtils.h"
 #include "src/interface/menu_helper.hpp"
-#include "src/interface/led_helper.hpp"
-#include "src/utilities/general_utilities.hpp"
+#include "src/interface/indicator_helpers.hpp"
+#include "src/interface/indicator_helpers.hpp"
 #include "src/sensors/temp_sensor_helper.hpp"
 #include "src/film_development/develop_film.hpp"
 #include "src/utilities/battery_utilities.hpp"
@@ -24,10 +24,11 @@
 /* ---------------------------------- SETUP --------------------------------- */
 StateType State = {
     OperationStateType::IDLE,
-    false,
-    false,
+    IndicatorStateType::AVAILABLE,
+    IndicatorStateType::AVAILABLE,
+    ChargeLevelType::FullCharge,
     millis(),
-    ChargeLevelType::FullCharge};
+};
 
 char tmpStr[STR_BUFF_LEN] = "";
 
@@ -52,7 +53,7 @@ void setup()
   pinMode(VIBRATE_MOT_2, OUTPUT);
 
   // Initialize UI pins.
-  pinMode(BUZZER, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RED_LED_PIN, OUTPUT);
   // Initialize encoder button.
   pinMode(ENC_SW, INPUT);
@@ -66,9 +67,12 @@ void loop()
   State.currentMillis = millis();
   BatteryMonitor::updateChargeLevel(State.batteryLevel);
 
-  if (State.ledInUse)
-    StatusLED::blink();
-
+  if (State.ledState == IndicatorStateType::BUSY)
+    Indicators::blinkLEDs();
+  if (State.buzzerState == IndicatorStateType::BUSY)
+  {
+    Indicators::buzz();
+  }
   int fid = 0; // Function ID
 
   // Info text from menu

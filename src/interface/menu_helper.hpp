@@ -7,7 +7,6 @@
 #include "../../globals.h"
 #include "../resources/icons.hpp"
 #include "../sensors/temp_sensor_helper.hpp"
-#include "../utilities/general_utilities.hpp"
 #include "../utilities/battery_utilities.hpp"
 #include "../interface/lcd_helper.hpp"
 

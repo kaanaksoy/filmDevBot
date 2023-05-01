@@ -7,11 +7,11 @@
 #include "../../debugUtils.h"
 #include "../resources/icons.hpp"
 #include "../interface/encoder_helper.hpp"
-#include "../interface/led_helper.hpp"
+#include "../interface/indicator_helpers.hpp"
 #include "../interface/lcd_helper.hpp"
 #include "../utilities/state_manager.hpp"
 #include "../interface/menu_helper.hpp"
-#include "../utilities/general_utilities.hpp"
+#include "../interface/indicator_helpers.hpp"
 #include "../sensors/temp_sensor_helper.hpp"
 
 namespace DevelopFilm

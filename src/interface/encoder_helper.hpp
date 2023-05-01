@@ -3,7 +3,7 @@
 
 // Header Files
 #include "../../globals.h"
-#include "../utilities/general_utilities.hpp"
+#include "../interface/indicator_helpers.hpp"
 
 namespace SystemEncoder
 {

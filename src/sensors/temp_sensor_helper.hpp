@@ -9,7 +9,7 @@
 
 #include "../../globals.h"
 #include "../../debugUtils.h"
-#include "../utilities/general_utilities.hpp"
+#include "../interface/indicator_helpers.hpp"
 #include "../utilities/state_manager.hpp"
 
 namespace TempSensors
