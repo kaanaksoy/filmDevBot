@@ -14,24 +14,19 @@ namespace MenuUI
 {
 
     // Define menu options
-    extern const char gMenuColor[];
     extern const char gMenuC41[];
-    extern const char gMenuE6[];
-    extern const char gMenuBW[];
-    extern const char gMenuBWCustom[];
+    extern const char gMenuCustom[];
 
     // Define menu functionIDs
     enum MenuFID
     {
-        MenuColor,
+        MenuNone,
         MenuC41,
-        MenuE6,
-        MenuBW,
-        MenuBWCustom
+        MenuCustom
     };
 
     // create menu instance
-    extern CMBMenu<5> gMenu;
+    extern CMBMenu<2> gMenu;
 
     // Print the development tank temp at the same location every time;
     void printTempReadings(float tankTemp);

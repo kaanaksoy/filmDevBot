@@ -2,20 +2,25 @@
 
 namespace DevelopFilm
 {
-    // --- ColorC41 | Film Development Functions ---
-    void ColorC41()
+    void Custom()
     {
-        DEBUG_PRINT(F("C41Strtnow"));
-        StateManager::setOperationState(OperationStateType::DEVELOPING);
+        return;
+    }
+    // Func for C41 Dev.
+    void ColorC41()
+    {        StateManager::setOperationState(INDEVELOPMENU);
 
-        int8_t pushPullValue = 0;
+        int8_t pushPullValue = 0; // var to store push pull value of process.
         uint16_t duration;
 
+        /* ----------------- Ask for desired push pull val from user ---------------- */
         Display::readyDisplay();
+
         sprintf_P(tmpStr, PSTR("%S %S"), p_C41, p_dev);
         Display::gLCD.print(tmpStr);
         EncoderInputType command = EncoderNone;
 
+        // Blocking func because we need to wait for a response from the user.
         while (command != EncoderEnter)
         {
             command = SystemEncoder::getCommand(command); // Determine command.
@@ -42,17 +47,15 @@ namespace DevelopFilm
                 break;
             case EncoderExit:
                 break;
-                StateManager::setOperationState(OperationStateType::IDLE);
+                StateManager::setOperationState(IDLE);
                 return;
             case EncoderNone:
             default:
                 break;
             }
         }
-        delay(1);
-
+        /* ----------------------- Confirm the push pull value ---------------------- */
         Display::readyDisplay();
-
         sprintf_P(tmpStr, PSTR("%S, %s%d %S"),
                   p_C41,
                   (0 > pushPullValue ? "-" : "+"),
@@ -67,258 +70,391 @@ namespace DevelopFilm
         sprintf_P(tmpStr, PSTR("%S"), p_toStrt);
         Display::gLCD.print(tmpStr);
 
+        switch (pushPullValue)
+        {
+        case 1:
+            duration = PUSH_ONE_DEV_DUR;
+            break;
+        case 2:
+            duration = PUSH_TWO_DEV_DUR;
+            break;
+        case 3:
+            duration = PUSH_THR_DEV_DUR;
+            break;
+        case -1:
+            duration = PULL_ONE_DEV_DUR;
+            break;
+        case 0:
+        default:
+            duration = STD_DEV_DUR;
+            break;
+        }
         switch (SystemEncoder::encoderAwaitConfirm())
         {
         case EncoderEnter:
-            /* code */
+            tone(BUZZER_PIN, 4000, 125);
             break;
         case EncoderExit:
-            StateManager::setOperationState(OperationStateType::IDLE);
+            StateManager::setOperationState(IDLE);
             return;
         default:
             break;
         }
 
+        /* -------------------------- Start Dev and Fixing -------------------------- */
         Display::readyDisplay();
+        Display::gLCD.setCursor(0,1);
         sprintf_P(tmpStr, PSTR("%S, %S"), p_running, p_dev);
         Display::gLCD.print(tmpStr);
         Display::gLCD.setCursor(11, 0);
         Display::gLCD.write(TANK_TEMP_ICON_ADDR);
 
-        develop(duration, 10, 6, 30);
-        DEBUG_PRINT(F("C41findev"));
+        develop(duration, STD_FRST_AGITATE_DUR, AGITATE_DUR,
+                STD_AGITATE_EVERY_DUR, FIXING_DUR, STD_FRST_AGITATE_DUR,
+                AGITATE_DUR, STD_AGITATE_EVERY_DUR);
+        // develop(duration, STD_FRST_AGITATE_DUR, AGITATE_DUR,
+        //         STD_AGITATE_EVERY_DUR, FIXING_DUR, STD_FRST_AGITATE_DUR,
+        //         11, STD_AGITATE_EVERY_DUR);
 
-        Display::readyDisplay();
-
-        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
-        Display::gLCD.print(tmpStr);
-        Display::gLCD.setCursor(0, 1);
-        Display::gLCD.write(ENTER_ICON_ADDR);
-        Display::gLCD.setCursor(2, 1);
-        sprintf_P(tmpStr, "%S %S", p_toStrt, p_fixing);
-        Display::gLCD.print(tmpStr);
-
-        DEBUG_PRINT(F("C41StrtFix"));
-
-        switch (SystemEncoder::encoderAwaitConfirm())
-        {
-        case EncoderEnter:
-            /* code */
-            break;
-        case EncoderExit:
-            StateManager::setOperationState(OperationStateType::IDLE);
-            return;
-        default:
-            break;
-        }
-
-        Display::readyDisplay();
-        sprintf_P(tmpStr, PSTR("%S"), p_fixing);
-        Display::gLCD.print(tmpStr);
-        Display::gLCD.setCursor(11, 0);
-        Display::gLCD.write(TANK_TEMP_ICON_ADDR);
-        fix(FIXING_DUR);
-        Display::readyDisplay();
-        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
-        Display::gLCD.print(tmpStr);
-        Display::gLCD.setCursor(3, 1);
-        Display::gLCD.write(ENTER_ICON_ADDR);
-        Display::gLCD.setCursor(5, 1);
-        sprintf_P(tmpStr, PSTR("%S"), p_toExit);
-        Display::gLCD.print(tmpStr);
-
-        switch (SystemEncoder::encoderAwaitConfirm())
-        {
-        case EncoderEnter:
-            /* code */
-            break;
-        case EncoderExit:
-            StateManager::setOperationState(OperationStateType::IDLE);
-            return;
-        default:
-            break;
-        }
-
-        StateManager::setOperationState(OperationStateType::IDLE);
         return;
     }
-
-    void ColorE6()
-    {
-        StateManager::setOperationState(OperationStateType::DEVELOPING);
-        // StatusLED::blink(5);
-        StateManager::setOperationState(OperationStateType::IDLE);
-        return;
-    }
-
-    void BWCustom()
-    {
-        StateManager::setOperationState(OperationStateType::DEVELOPING);
-        StateManager::setOperationState(OperationStateType::IDLE);
-        return;
-    }
-
     /*
-  --- agitate | Film Development Helper Functions ---
-  duration: Agitate duration in seconds
-  AGITATE_MOT_1: Motor Control Pin 1
-  AGITATE_MOT_2: Motor Control Pin 2
-
-  Runs the agitate motor for the amount of time provided,
-  each time in a different direction.
-*/
-    void agitate(int duration)
+          --- develop | Film Development Functions ---
+          Develop function that handles the development process.
+        */
+    int develop(int devDurSec, int fstAgitDurSec, int agitDurSec,
+                int agitEvryDurSec, int fixDurSec, int fstFixAgitDurSec,
+                int fixAgitDurSec, int fixAgitEveryDurSec)
     {
-        DEBUG_PRINT("Agitstrt");
+        // parameters of the current development.
+        static int devCyclesRemaining;
+        static unsigned int devPadding;
+        static int devAgitationInterval; // agitEveryDurSec * 1000
+        static int devAgitDur; // agitDurSec
+
+        static int fixCyclesRemaining;
+        static unsigned int fixPadding;
+        static int fixAgitationInterval; // fixAgitEveryDurSec * 1000
+        static int fixAgitDur; // fixAgitDursec
+        static int firstFixAgitDur; // firstFixAgitDurSec
+
+
+        // flags used to track where in the development process we are.
+        static bool firstDevAgitateComplete;
+        static bool firstFixAgitateComplete;
+        static bool mainDevAgitateComplete;
+        static bool mainFixAgitateComplete;
+        // used to check if we need to check if agitate is finished.
+        static bool agitateRunning;
+        int agitateStatus; // In order to see check the status of agitate.
+
+        // used to track how long the current process has been going for.
+        static unsigned long lastOperationMillis;
+
+        switch (State.currentState)
+        {
+        case INDEVELOPMENU:
+            // We were called for the first time, set params and start first agitate.
+            StateManager::setOperationState(DEVELOPING);
+
+            // Calculate the necessary parameters.
+            devCyclesRemaining = (devDurSec - fstAgitDurSec) / (agitDurSec + agitEvryDurSec);
+            devPadding = ((devDurSec - fstAgitDurSec) % (agitDurSec + agitEvryDurSec)) * 1000;
+            devAgitationInterval = agitEvryDurSec * 1000; // Calculate and store the other params
+            devAgitDur = agitDurSec;
+
+            fixCyclesRemaining = (fixDurSec - fstFixAgitDurSec) / (fixAgitDurSec + fixAgitEveryDurSec);
+            fixPadding = ((fixDurSec - fstFixAgitDurSec) % (fixAgitDurSec + fixAgitEveryDurSec)) * 1000;
+            fixAgitationInterval = fixAgitEveryDurSec * 1000;
+            fixAgitDur = fixAgitDurSec;
+            firstFixAgitDur = fstFixAgitDurSec;
+            
+
+            // Set our tracking flags, since we just started.
+            firstDevAgitateComplete = false;
+            firstFixAgitateComplete = false;
+            mainDevAgitateComplete = false;
+            mainFixAgitateComplete = false;
+            agitateRunning = false;
+
+            /* ----------------------------- Dev Operations ----------------------------- */
+
+            // Start the first agitation.
+            agitate(fstAgitDurSec);
+            agitateRunning = true;
+            return 0;
+            break;
+        case DEVELOPING: // Develop was called because we were running.
+            if (!firstDevAgitateComplete) // We need to check if we completed the first agitation before we move on.
+            {
+                agitateStatus = agitate();
+                if (agitateStatus == 1)
+                {
+                    lastOperationMillis = millis(); // Set the last operation time.
+                    firstDevAgitateComplete = true;
+                    agitateRunning = false;
+                    return 0;
+                }
+                else if (agitateStatus = 0)
+                {
+                    return 0;
+                } else 
+                {
+                    DEBUG_TRACE();
+                    return -1;
+                }
+            }
+            // Since we finished the first agitation and are not waiting on an another agitation, lets find out what we need to do.
+            else if (!mainDevAgitateComplete) // If we are in the main agitation cycles.
+            {
+                // Since we completed the first agitation, lets first check if we are waiting for an agitatation.
+                if (agitateRunning)
+                {
+                    agitateStatus = agitate();
+                    if (agitateStatus == 1)
+                    {
+                        lastOperationMillis = millis();
+                        firstDevAgitateComplete = true;
+                        agitateRunning = false;
+                        return 0;
+                    }
+                    else if (agitateStatus = 0)
+                    {
+                        return 0;
+                    } else 
+                    {
+                        DEBUG_TRACE();
+                        return -1;
+                    }
+                }
+                else if (devCyclesRemaining > 0)
+                {
+                    if (millis() - lastOperationMillis >= devAgitationInterval)
+                    {
+                        if (devCyclesRemaining == 2)
+                            tone(BUZZER_PIN, 4000, 2000);
+                        agitateRunning = true;
+                        devCyclesRemaining--;
+                        agitate(devAgitDur);
+                        return 0;
+                    }
+                    else
+                        return 0;
+                }
+                else if (devCyclesRemaining <= 0)// If we dont have any cycles left, we should do the padding wait.
+                {
+                    if (millis() - lastOperationMillis >= devPadding)
+                    {
+                        tone(BUZZER_PIN, 4000, 1000);
+                        mainDevAgitateComplete = true;
+                        // TODO FINISH PROGRESS BAR
+                        Display::readyDisplay();
+
+                        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
+                        Display::gLCD.print(tmpStr);
+                        Display::gLCD.setCursor(0, 1);
+                        Display::gLCD.write(ENTER_ICON_ADDR);
+                        Display::gLCD.setCursor(2, 1);
+                        sprintf_P(tmpStr, "%S %S", p_toStrt, p_fixing);
+                        Display::gLCD.print(tmpStr);
+
+                        switch (SystemEncoder::encoderAwaitConfirm())
+                        {
+                        case EncoderEnter:
+                            /* code */
+                            break;
+                        case EncoderExit:
+                        default:
+                            break;
+                        }
+
+                        Display::readyDisplay();
+                        Display::gLCD.setCursor(0,1);
+                        sprintf_P(tmpStr, PSTR("%S"), p_fixing);
+                        Display::gLCD.print(tmpStr);
+                        Display::gLCD.setCursor(11, 0);
+                        Display::gLCD.write(TANK_TEMP_ICON_ADDR);
+
+                        /* ---------------------------- Fixing operations --------------------------- */
+
+                        agitateRunning = true;
+                        agitate(firstFixAgitDur);
+                        return 0;
+                    }
+                    else
+                        return 0;
+                } else return -1;
+            }
+            else if (!firstFixAgitateComplete) // Lets see if the first fix agitate is complete. (Started as the last step of dev)
+            {
+                agitateStatus = agitate();
+                if (agitateStatus == 1)
+                {
+                    
+                    lastOperationMillis = millis();
+                    firstFixAgitateComplete = true;
+                    agitateRunning = false;
+                    return 0;
+                }
+                else if (agitateStatus = 0)
+                {
+                    return 0;
+                } else 
+                {
+                    DEBUG_TRACE();
+                    return -1;
+                }
+            }
+            // Since we finished the first agitation and are not waiting on an another agitation, lets find out what we need to do.
+            else if (!mainFixAgitateComplete) // Since were fixing now, lets do the fixing things
+            {
+                // Since we completed the first agitation, lets first check if we are waiting for an agitatation.
+                if (agitateRunning)
+                {
+                    agitateStatus = agitate();
+                    if (agitateStatus == 1)
+                    {
+                        lastOperationMillis = millis();
+                        firstDevAgitateComplete = true;
+                        agitateRunning = false;
+                        return 0;
+                    }
+                    else if (agitateStatus = 0)
+                    {
+                        return 0;
+                    } else 
+                    {
+                        DEBUG_TRACE();
+                        return -1;
+                    }
+                }
+                else if (fixCyclesRemaining > 0)
+                {
+                    if (millis() - lastOperationMillis >= fixAgitationInterval)
+                    {
+                        if (fixCyclesRemaining == 2)
+                            tone(BUZZER_PIN, 4000, 1000);
+                        agitateRunning = true;
+                        fixCyclesRemaining--;
+                        agitate(fixAgitDur);
+                        return 0;
+                    }
+                    else
+                        return 0;
+                }
+                else if (fixCyclesRemaining <= 0)
+                {
+                    if (millis() - lastOperationMillis >= fixPadding)
+                    {
+                        tone(BUZZER_PIN, 4000, 125);
+                        // TODO PROGRESS BAR FINISHED
+                        mainFixAgitateComplete = true;
+                        Display::readyDisplay();
+
+                        sprintf_P(tmpStr, PSTR("%S %S"),p_fixing , p_finsihed);
+                        Display::gLCD.print(tmpStr);
+                        Display::gLCD.setCursor(0, 1);
+                        Display::gLCD.write(ENTER_ICON_ADDR);
+                        Display::gLCD.setCursor(1, 1);
+                        sprintf_P(tmpStr, PSTR(" %S"), p_toExit);
+                        Display::gLCD.print(tmpStr);
+
+                        switch (SystemEncoder::encoderAwaitConfirm())
+                        {
+                        case EncoderEnter:
+                            StateManager::setOperationState(IDLE);
+                            return 1;
+                            break;
+                        case EncoderExit:
+                        default:
+                            break;
+                        }
+                    }
+                    else
+                        return 0;
+                }
+            }
+            break;
+        // If we get here with a state mismatch, we have a problem.
+        case IDLE:
+        case MONITORING:
+        default:
+            DEBUG_PRINT("Develop called unexpectedly");
+            return -1;
+            break;
+        }
+        DEBUG_PRINT("Develop falled through");
+        return -1;
+    }
+    /*
+        --- agitate | Film Development Helper Functions ---
+        duration: Agitate duration in seconds
+        AGITATE_MOT_1: Motor Control Pin 1
+        AGITATE_MOT_2: Motor Control Pin 2
+
+        Runs the agitate motor for the amount of time provided,
+        each time in a different direction.
+    */
+    int agitate(uint16_t duration)
+    {
+        DEBUG_PRINT("Agit Called");
+        DEBUG_PRINT(duration);
 
         static bool agitateDirectionFlag = true;
-        bool motorRunning = false;
-        unsigned long motorStartMillis;
+        static bool motorRunning;
+        static unsigned long motorStartMillis;
+        static uint16_t motorToRunFor;
 
-        switch (agitateDirectionFlag)
+        switch (duration != 0)
         {
         case true:
-            for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+            DEBUG_PRINT("Started Motors");
+            if (!motorRunning)
             {
-                analogWrite(AGITATE_MOT_1, pwmVal);
-                analogWrite(AGITATE_MOT_2, 0);
-                delay(5);
+                motorStartMillis = millis();
+                motorToRunFor = duration * 1000;
+                motorRunning = true;
+                if (agitateDirectionFlag)
+                {
+                    for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+                    {
+                        analogWrite(AGITATE_MOT_1, pwmVal);
+                        analogWrite(AGITATE_MOT_2, 0);
+                        delay(5);
+                    }
+                }
+                else
+                {
+                    for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+                    {
+                        analogWrite(AGITATE_MOT_1, 0);
+                        analogWrite(AGITATE_MOT_2, pwmVal);
+                        delay(5);
+                    }
+                }
+                return 0;
+            } else
+            {
+                DEBUG_PRINT("Agitate: Error, multiple calls to agitate different durations");
+                return -1;
             }
-
             break;
         case false:
-        default:
-            for (int pwmVal = 0; pwmVal < 256; pwmVal += 5)
+            DEBUG_PRINT("Agit check");
+            if (millis() - motorStartMillis >= motorToRunFor)
             {
-                analogWrite(AGITATE_MOT_1, 0);
-                analogWrite(AGITATE_MOT_2, pwmVal);
-                delay(5);
-            }
-            break;
-        }
-
-        motorStartMillis = State.currentMillis;
-        motorRunning = true;
-
-        while (motorRunning)
-        {
-            if (State.currentMillis > motorStartMillis + (duration * 1000))
-            {
+                DEBUG_PRINT("Stopping Mots");
                 analogWrite(AGITATE_MOT_1, 0);
                 analogWrite(AGITATE_MOT_2, 0);
                 motorRunning = false;
-            }
-            TempSensors::requestTankTemp();
-            MenuUI::printTempReadings(TempSensors::getTankTemp());
+                agitateDirectionFlag = !agitateDirectionFlag;
+                return 1;
+            } else return 0;
+            break;
+        default:
+            break;
         }
-        agitateDirectionFlag = !agitateDirectionFlag;
-        return;
+        return -1;
     }
 
-    /*
-    --- vibrate | Film Development Helper Functions ---
-    AGITATE_MOT_1: Motor Control Pin 1
-    AGITATE_MOT_2: Motor Control Pin 2
-
-    Simple vibrate function, used to release air bubbles from the emulsion surface.
-  */
-    void vibrate()
-    {
-        unsigned long motorStartTime;
-        bool motorRunning;
-
-        for (int count = 0; count < 4; count++)
-        {
-            DEBUG_PRINT(String("Vibrated ") + count + String(" time(s)."));
-            motorStartTime = State.currentMillis;
-            analogWrite(VIBRATE_MOT_1, 255);
-            analogWrite(VIBRATE_MOT_2, 0);
-            motorRunning = true;
-
-            while (motorRunning)
-            {
-                if (State.currentMillis > motorStartTime + 1000)
-                {
-                    analogWrite(VIBRATE_MOT_1, 0);
-                    analogWrite(VIBRATE_MOT_2, 0);
-                    motorRunning = false;
-                }
-                TempSensors::requestTankTemp();
-                MenuUI::printTempReadings(TempSensors::getTankTemp());
-            }
-            motorRunning = State.currentMillis;
-            while (!motorRunning)
-            {
-                if (State.currentMillis > motorRunning + 500)
-                    motorRunning = true;
-                TempSensors::requestTankTemp();
-                MenuUI::printTempReadings(TempSensors::getTankTemp());
-            }
-        }
-        analogWrite(VIBRATE_MOT_2, 0);
-        analogWrite(VIBRATE_MOT_1, 0);
-        return;
-    }
-
-    /*
-      --- develop | Film Development Functions ---
-      Develop function that handles the development process.
-    */
-    void develop(uint16_t devDurationSeconds,
-                 uint8_t firstAgitationDurationSeconds,
-                 uint8_t agitationDurationSeconds,
-                 uint16_t agitateEveryDurationSeconds)
-    {
-
-        uint8_t totalCycles = (devDurationSeconds - firstAgitationDurationSeconds) /
-                              (agitationDurationSeconds + agitateEveryDurationSeconds);
-        uint8_t padding = (devDurationSeconds - firstAgitationDurationSeconds) %
-                          (agitationDurationSeconds + agitateEveryDurationSeconds);
-
-        unsigned long startTime;
-        digitalWrite(RED_LED_PIN, HIGH);
-
-        agitate(firstAgitationDurationSeconds);
-        vibrate();
-
-        for (uint8_t cycleCount = 0; cycleCount < totalCycles; cycleCount++)
-        {
-            startTime = State.currentMillis;
-
-            while (State.currentMillis < startTime + (agitateEveryDurationSeconds * 1000))
-            {
-                TempSensors::requestTankTemp();
-                MenuUI::printTempReadings(TempSensors::getTankTemp());
-                delay(250);
-            }
-            agitate(agitationDurationSeconds);
-
-            if (cycleCount + 2 >= totalCycles)
-                tone(BUZZER_PIN, 4000, 125);
-
-            startTime = State.currentMillis;
-            while (State.currentMillis < startTime + (padding * 1000))
-            {
-                TempSensors::requestTankTemp();
-                MenuUI::printTempReadings(TempSensors::getTankTemp());
-                delay(250);
-            }
-            tone(BUZZER_PIN, 4000, 125);
-        }
-        digitalWrite(RED_LED_PIN, LOW);
-        return;
-    }
-    /*
-      --- fix | Film Development Functions ---
-      fix function handles the Fixing Step of the process. vales in seconds.
-      */
-    void fix(uint8_t fixingDurationSeconds)
-    {
-        digitalWrite(RED_LED_PIN, HIGH);
-        develop(FIXING_DUR, 10, 7, 30);
-
-        tone(BUZZER_PIN, 4000, 125);
-        digitalWrite(RED_LED_PIN, LOW);
-        return;
-    }
-} // namespace DevelopFilm
+} // namespace DevelopFilm2

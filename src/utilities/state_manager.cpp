@@ -1,5 +1,4 @@
 #include "state_manager.hpp"
-
 namespace StateManager
 {
     void setOperationState(OperationStateType newState)

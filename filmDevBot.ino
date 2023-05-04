@@ -3,7 +3,7 @@
   - Automates your film development using AP Tanks.
 */
 
-// #define DEBUG // Uncomment to turn on debug statements.
+//#define DEBUG // Uncomment to turn on debug statements.
 #include <ArduinoTrace.h>
 #include <LCD_I2C.h>
 
@@ -63,26 +63,37 @@ void setup()
 
 void loop()
 {
-
   State.currentMillis = millis();
   BatteryMonitor::updateChargeLevel(State.batteryLevel);
 
   if (State.ledState == IndicatorStateType::BUSY)
     Indicators::blinkLEDs();
   if (State.buzzerState == IndicatorStateType::BUSY)
-  {
     Indicators::buzz();
-  }
-  int fid = 0; // Function ID
-
-  // Info text from menu
-  const char *info;
-  bool layerChanged = false; // Should navigate layers?
 
   switch (State.currentState)
   {
-  case IDLE:
+  case OperationStateType::DEVELOPING:
+    DevelopFilm::develop();
+    TempSensors::requestTankTemp();
+    MenuUI::printTempReadings(TempSensors::getTankTemp());
+    break;
+
+  case OperationStateType::INDEVELOPMENU:
+    TempSensors::requestTankTemp();
+    MenuUI::printTempReadings(TempSensors::getTankTemp());
+    break;
+
+  case OperationStateType::IDLE:
+  
+    int fid = 0; // Function ID
+
+    // Info text from menu
+    const char *info;
+    bool layerChanged = false; // Should navigate layers?
     EncoderInputType command = SystemEncoder::getCommand(command);
+    TempSensors::requestTankTemp();
+    MenuUI::printTempReadings(TempSensors::getTankTemp());
     // Call menu methods based on command selection
     switch (command)
     {
@@ -114,16 +125,15 @@ void loop()
       // Do action regarding fid
       if ((0 != fid) && (command == EncoderEnter) && (!layerChanged))
       {
+        DEBUG_PRINT(fid);
         switch (fid)
         {
         case MenuUI::MenuC41:
+          DEBUG_TRACE();
           DevelopFilm::ColorC41();
           break;
-        case MenuUI::MenuE6:
-          DevelopFilm::ColorE6();
-          break;
-        case MenuUI::MenuBWCustom:
-          DevelopFilm::BWCustom();
+        case MenuUI::MenuCustom:
+          DevelopFilm::Custom();
           break;
         default:
           break;
@@ -132,17 +142,9 @@ void loop()
     }
     TempSensors::requestTankTemp();
     MenuUI::printTempReadings(TempSensors::getTankTemp());
+  break;
 
-    break;
-
-  case DEVELOPING:
-
-    TempSensors::requestTankTemp();
-    MenuUI::printTempReadings(TempSensors::getTankTemp());
-
-    break;
-
-  case MONITORING:
+  case OperationStateType::MONITORING:
     StateManager::setOperationState(IDLE);
   default:
     break;

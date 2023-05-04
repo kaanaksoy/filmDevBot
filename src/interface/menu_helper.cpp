@@ -2,14 +2,11 @@
 
 namespace MenuUI
 {
-    CMBMenu<5> gMenu;
+    CMBMenu<2> gMenu;
 
     // Define menu options
-    const char gMenuColor[] PROGMEM = {"  Color   "};
     const char gMenuC41[] PROGMEM = {"   C-41   "};
-    const char gMenuE6[] PROGMEM = {"   E-6    "};
-    const char gMenuBW[] PROGMEM = {"   B&W    "};
-    const char gMenuBWCustom[] PROGMEM = {"  Custom  "};
+    const char gMenuCustom[] PROGMEM = {"  Custom  "};
 
     // Print the development tank temp at the same location every time;
     void printTempReadings(float tankTemp)
@@ -34,28 +31,15 @@ namespace MenuUI
         Display::gLCD.print(infoStr);
 
         // Print navigation UI
-        if (infoStr == "  Color   ")
+        if (infoStr == F("   C-41   "))
         {
             Display::gLCD.setCursor(7, 1);
             Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
         }
-        else if (infoStr == "   C-41   ")
-        {
-            Display::gLCD.setCursor(7, 1);
-            Display::gLCD.write(RIGHT_ARR_ICON_ADDR);
-        }
-        else if (infoStr == "   E-6    ")
+        else if (infoStr == F("  Custom  "))
         {
             Display::gLCD.setCursor(3, 1);
             Display::gLCD.write(LEFT_ARR_ICON_ADDR);
-        }
-        else if (infoStr == "   B&W    ")
-        {
-            Display::gLCD.setCursor(3, 1);
-            Display::gLCD.write(LEFT_ARR_ICON_ADDR);
-        }
-        else if (infoStr == "  Custom  ")
-        {
         }
         else
         {
@@ -80,12 +64,8 @@ namespace MenuUI
     void createMenu()
     {
         // Add Nodes to the menu
-        gMenu.addNode(0, gMenuColor, MenuColor);
-        gMenu.addNode(1, gMenuC41, MenuC41);
-        gMenu.addNode(1, gMenuE6, MenuE6);
-
-        gMenu.addNode(0, gMenuBW, MenuBW);
-        gMenu.addNode(1, gMenuBWCustom, MenuBWCustom);
+        gMenu.addNode(0, gMenuC41, MenuC41);
+        gMenu.addNode(0, gMenuCustom, MenuCustom);
 
         Display::initCustomChars();
         // Build & Print Menu
@@ -100,9 +80,6 @@ namespace MenuUI
     {
         const char *info;
         gMenu.getInfo(info);
-        // gMenu.buildMenu(info);
-        // gMenu.printMenu();
-        // Print Current Menu Entry
         printMenuEntry(info);
     }
 

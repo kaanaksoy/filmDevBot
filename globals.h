@@ -27,6 +27,10 @@
 #define PUSH_ONE_DEV_DUR 273
 #define PUSH_TWO_DEV_DUR 368
 #define PUSH_THR_DEV_DUR 525
+
+#define STD_FRST_AGITATE_DUR 10
+#define AGITATE_DUR 10
+#define STD_AGITATE_EVERY_DUR 30
 #define FIXING_DUR 480
 
 /* -------------------------------------------------------------------------- */
@@ -136,6 +140,7 @@ enum OperationStateType
 {
     IDLE,
     DEVELOPING,
+    INDEVELOPMENU,
     MONITORING
 };
 
