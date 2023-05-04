@@ -2,6 +2,10 @@
 #define DEVELOP_FILM_HPP
 #pragma once
 
+/* -------------------------------------------------------------------------- */
+/*                           THIS FILE IS DEPRECATED                          */
+/* -------------------------------------------------------------------------- */
+
 #include "Arduino.h"
 #include "../../globals.h"
 #include "../../debugUtils.h"

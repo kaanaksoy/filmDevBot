@@ -18,6 +18,16 @@ namespace SystemEncoder
             default:
                 break;
             }
+            if (State.ledState == IndicatorStateType::BUSY)
+            {
+                Indicators::blinkLEDs();
+            }
+            if (State.buzzerState == IndicatorStateType::BUSY)
+            {
+                Indicators::buzz();
+            }
+            
+            
         }
     }
 

@@ -148,6 +148,7 @@ enum OperationStateType
 enum IndicatorStateType
 {
     BUSY,
+    BUSYAuto, // Busy bot doesn't require calls from loop()
     AVAILABLE
 };
 enum ChargeLevelType

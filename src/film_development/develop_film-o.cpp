@@ -1,5 +1,9 @@
 #include "develop_film-o.hpp"
 
+
+/* -------------------------------------------------------------------------- */
+/*                           THIS FILE IS DEPRECATED                          */
+/* -------------------------------------------------------------------------- */
 namespace DevelopFilm2
 {
     // --- ColorC41 | Film Development Functions ---

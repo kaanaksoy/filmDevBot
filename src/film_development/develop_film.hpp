@@ -52,9 +52,6 @@ namespace DevelopFilm
       --- develop | Film Development Functions ---
       Develop function that handles the development process.
     */
-    // int develop(uint16_t devDurSec = 0, uint8_t fstAgitDurSec = 0, uint8_t agitDurSec = 0,
-    //             uint16_t agitEvryDurSec = 0, uint16_t fixDurSec = 0, uint8_t fstFixAgitDurSec = 0,
-    //             uint8_t fixAgitDurSec = 0, uint16_t fixAgitEveryDurSec = 0);
     int develop(int devDurSec = 0, int fstAgitDurSec = 0, int agitDurSec =0,
                 int agitEvryDurSec = 0, int fixDurSec = 0, int fstFixAgitDurSec = 0,
                 int fixAgitDurSec = 0, int fixAgitEveryDurSec = 0);

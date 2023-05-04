@@ -151,6 +151,8 @@ namespace DevelopFilm
         // used to track how long the current process has been going for.
         static unsigned long lastOperationMillis;
 
+        static unsigned int totalProgressSteps; // max num of steps for progressbar.
+
         switch (State.currentState)
         {
         case INDEVELOPMENU:
@@ -177,9 +179,12 @@ namespace DevelopFilm
             mainFixAgitateComplete = false;
             agitateRunning = false;
 
+            //Set the progressBar var
+            totalProgressSteps = devCyclesRemaining + 2; // +1 for first agitate + 1 for padding
             /* ----------------------------- Dev Operations ----------------------------- */
 
             // Start the first agitation.
+            Indicators::progressBarLEDs(); //Start the progressBar
             agitate(fstAgitDurSec);
             agitateRunning = true;
             return 0;
@@ -192,6 +197,12 @@ namespace DevelopFilm
                 {
                     lastOperationMillis = millis(); // Set the last operation time.
                     firstDevAgitateComplete = true;
+
+                    /* Calculate the number of steps completed (-1 is to subtract the now completed first Agitate step)
+                    multiply that with the num of leds per steps. */
+                    Indicators::progressBarLEDs(((totalProgressSteps - devCyclesRemaining - 1) * (Indicators::calculateProgressBarStep(totalProgressSteps))));
+                    //Indicators::progressBarLEDs(9);
+                    
                     agitateRunning = false;
                     return 0;
                 }
@@ -216,6 +227,10 @@ namespace DevelopFilm
                         lastOperationMillis = millis();
                         firstDevAgitateComplete = true;
                         agitateRunning = false;
+                        /* Calculate the number of steps completed (-1 is to subtract the completed first Agitate step)
+                        multiply that with the num of leds per steps. */
+                        Indicators::progressBarLEDs((totalProgressSteps - devCyclesRemaining - 1) * 
+                                                    (Indicators::calculateProgressBarStep(totalProgressSteps)));
                         return 0;
                     }
                     else if (agitateStatus = 0)
@@ -247,17 +262,22 @@ namespace DevelopFilm
                     {
                         tone(BUZZER_PIN, 4000, 1000);
                         mainDevAgitateComplete = true;
-                        // TODO FINISH PROGRESS BAR
+
+                        Indicators::progressBarLEDs(100); // Set the progressbar to 100%.
                         Display::readyDisplay();
 
-                        sprintf_P(tmpStr, PSTR("%S"), p_finsihed);
+                        sprintf_P(tmpStr, PSTR("%S %S"),p_dev , p_finsihed);
                         Display::gLCD.print(tmpStr);
                         Display::gLCD.setCursor(0, 1);
                         Display::gLCD.write(ENTER_ICON_ADDR);
-                        Display::gLCD.setCursor(2, 1);
-                        sprintf_P(tmpStr, "%S %S", p_toStrt, p_fixing);
+                        Display::gLCD.setCursor(1, 1);
+                        sprintf_P(tmpStr, PSTR(" %S"), p_toExit);
                         Display::gLCD.print(tmpStr);
 
+                        delay(25);
+                        Indicators::progressBarLEDs(); // Turn off the progressbar
+                        Indicators::blinkLEDs(CRGB::Green, BLINK_FAST_INTERVAL, Indicators::IndicatorParamType::START);
+                        Indicators::buzz(BUZZER_FAST_INTERVAL, Indicators::IndicatorParamType::START);
                         switch (SystemEncoder::encoderAwaitConfirm())
                         {
                         case EncoderEnter:
@@ -268,6 +288,12 @@ namespace DevelopFilm
                             break;
                         }
 
+                        Indicators::blinkLEDs(CRGB::Green, BLINK_FAST_INTERVAL, Indicators::IndicatorParamType::STOP);
+                        Indicators::buzz(BUZZER_FAST_INTERVAL, Indicators::IndicatorParamType::STOP);
+                        Indicators::progressBarLEDs(); //Restart the progressbar
+
+                        /* ---------------------------- Fixing operations --------------------------- */
+
                         Display::readyDisplay();
                         Display::gLCD.setCursor(0,1);
                         sprintf_P(tmpStr, PSTR("%S"), p_fixing);
@@ -275,10 +301,11 @@ namespace DevelopFilm
                         Display::gLCD.setCursor(11, 0);
                         Display::gLCD.write(TANK_TEMP_ICON_ADDR);
 
-                        /* ---------------------------- Fixing operations --------------------------- */
-
+                        totalProgressSteps = fixCyclesRemaining + 2; // +1 for first agitate + 1 for padding
                         agitateRunning = true;
+                        Indicators::progressBarLEDs();
                         agitate(firstFixAgitDur);
+                    
                         return 0;
                     }
                     else
@@ -294,6 +321,11 @@ namespace DevelopFilm
                     lastOperationMillis = millis();
                     firstFixAgitateComplete = true;
                     agitateRunning = false;
+                    // TODO PROGRESSBAR STEP
+                    /* Calculate the number of steps completed (-1 is to subtract the now completed first Agitate step)
+                    multiply that with the num of leds per steps. */
+                    Indicators::progressBarLEDs((totalProgressSteps - fixCyclesRemaining - 1) * 
+                                                (Indicators::calculateProgressBarStep(totalProgressSteps)));
                     return 0;
                 }
                 else if (agitateStatus = 0)
@@ -317,6 +349,10 @@ namespace DevelopFilm
                         lastOperationMillis = millis();
                         firstDevAgitateComplete = true;
                         agitateRunning = false;
+                        /* Calculate the number of steps completed (-1 is to subtract the now completed first Agitate step)
+                        multiply that with the num of leds per steps. */
+                        Indicators::progressBarLEDs((totalProgressSteps - fixCyclesRemaining - 1) * 
+                                                    (Indicators::calculateProgressBarStep(totalProgressSteps)));
                         return 0;
                     }
                     else if (agitateStatus = 0)
@@ -347,8 +383,9 @@ namespace DevelopFilm
                     if (millis() - lastOperationMillis >= fixPadding)
                     {
                         tone(BUZZER_PIN, 4000, 125);
-                        // TODO PROGRESS BAR FINISHED
                         mainFixAgitateComplete = true;
+
+                        Indicators::progressBarLEDs(100); // Set progressbar to 100%
                         Display::readyDisplay();
 
                         sprintf_P(tmpStr, PSTR("%S %S"),p_fixing , p_finsihed);
@@ -359,9 +396,15 @@ namespace DevelopFilm
                         sprintf_P(tmpStr, PSTR(" %S"), p_toExit);
                         Display::gLCD.print(tmpStr);
 
+                        delay(25); // To make sure the 100% progressbar is visible.
+                        Indicators::progressBarLEDs();
+                        Indicators::blinkLEDs(CRGB::Green, BLINK_FAST_INTERVAL, Indicators::IndicatorParamType::START);
+                        Indicators::buzz(BUZZER_FAST_INTERVAL, Indicators::IndicatorParamType::START);
                         switch (SystemEncoder::encoderAwaitConfirm())
                         {
                         case EncoderEnter:
+                            Indicators::blinkLEDs(CRGB::Green, BLINK_FAST_INTERVAL, Indicators::IndicatorParamType::STOP);
+                            Indicators::buzz(BUZZER_FAST_INTERVAL, Indicators::IndicatorParamType::STOP);
                             StateManager::setOperationState(IDLE);
                             return 1;
                             break;
@@ -369,6 +412,7 @@ namespace DevelopFilm
                         default:
                             break;
                         }
+
                     }
                     else
                         return 0;

@@ -5,6 +5,7 @@
 #include <FastLED.h>
 
 #include "../../globals.h"
+#include "../../debugUtils.h"
 
 namespace Indicators
 {
@@ -19,6 +20,9 @@ namespace Indicators
     void blinkLEDs(CRGB::HTMLColorCode color = CRGB::Red,
                    int interval = BLINK_NORMAL_INTERVAL,
                    IndicatorParamType action = IndicatorParamType::TOGGLE);
+
+    // Calculates how many leds to be lit per step based on num leds available
+    int calculateProgressBarStep(int maxSteps);
 
     void progressBarLEDs(uint8_t progress = 0);
 

@@ -75,35 +75,59 @@ namespace Indicators
         }
         return;
     }
+    // Calculates how many leds to be lit per step based on num leds available
+    int calculateProgressBarStep(int maxSteps){
+        return NUM_LEDS / maxSteps;
+    }
 
     void progressBarLEDs(uint8_t progress)
     {
         static bool progressBarRunning;
 
-        switch (progress = 0) // If func was called without a parameter.
+        switch (progress == 0) // If func was called without a parameter.
 
         {
         case true:
             if (progressBarRunning)
             { // If there is an instance of the progressbar running, we turn it off.
+                DEBUG_PRINT("ProgressBarFinished");
                 fill_solid(gLEDS, NUM_LEDS, CRGB::Black);
                 progressBarRunning = false;
                 State.ledState = IndicatorStateType::AVAILABLE;
             }
             else // Else start the progress bar.
             {
-                State.ledState = IndicatorStateType::BUSY;
+                DEBUG_PRINT("ProgressBarStarted");
+                State.ledState = IndicatorStateType::BUSYAuto;
                 progressBarRunning = true;
                 fill_solid(gLEDS, NUM_LEDS, DIM_WHITE);
             }
             break;
         case false:
-            int ledsToFill = (progress * NUM_LEDS / 100) + 2; // Calculate the number of leds to fill per step.
-            fill_solid(gLEDS, ledsToFill, CRGB::Green);
+            if (!progressBarRunning)
+            {
+                DEBUG_PRINT("ProgressBarStarted");
+                State.ledState = IndicatorStateType::BUSYAuto;
+                progressBarRunning = true;
+                fill_solid(gLEDS, NUM_LEDS, DIM_WHITE);
+            }
+            DEBUG_PRINT("ProgressBarUpdated: ");
+            DEBUG_PRINT(progress);
+            if (progress == 100)
+            {
+                fill_solid(gLEDS, NUM_LEDS, CRGB::Green);
+            }  else
+            {
+                fill_solid(gLEDS, progress, CRGB::Green);
+            }
+            
+            // int ledsToFill = (progress * NUM_LEDS / 100) + 2; // Calculate the number of leds to fill per step.
+            //fill_solid(gLEDS, progress, CRGB::Green);
         default:
             break;
         }
         FastLED.show();
+        return;
     }
 
     /*

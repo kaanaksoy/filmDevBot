@@ -45,6 +45,7 @@ void setup()
   EncoderInputType command = EncoderNone;
   BatteryMonitor::initBatteryChargeMeasurement();
   TempSensors::initializeTempSensor();
+  Indicators::initLEDs();
 
   // Initialize motor control pins.
   pinMode(AGITATE_MOT_1, OUTPUT);
