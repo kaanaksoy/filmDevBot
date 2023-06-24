@@ -1,52 +1,56 @@
+
 #include "state_manager.hpp"
 namespace StateManager
 {
     void setOperationState(OperationStateType newState)
     {
-#ifdef DEBUG
-        DEBUG_PRINT("State Was: ");
-        switch (State.currentState)
-        {
-        case IDLE:
-            DEBUG_PRINT("IDLE");
-            break;
-        case DEVELOPING:
-            DEBUG_PRINT("DEVELOPING");
-            break;
-        case MONITORING:
-            DEBUG_PRINT("MONITORING");
-            break;
-        default:
-            DEBUG_PRINT("NULL");
-            DEBUG_TRACE();
-            break;
-        }
-#endif
+        // #ifndef DEBUG
+        // #define DEBUG
+        //         Serial.println("State Was: ");
+        //         switch (State.currentState)
+        //         {
+        //         case IDLE:
+        //             Serial.println("IDLE");
+        //             break;
+        //         case DEVELOPING:
+        //             Serial.println("DEVELOPING");
+        //             break;
+        //         case MONITORING:
+        //             Serial.println("MONITORING");
+        //             break;
+        //         case INDEVELOPMENU:
+        //             Serial.println("INDEVELOPMENU");
+        //             break;
+        //         default:
+        //             Serial.println("NULL");
+        //             break;
+        //         }
+        //         Serial.println("State became: ");
+        //         switch (newState)
+        //         {
+        //         case IDLE:
+        //             Serial.println("IDLE");
+        //             break;
+        //         case DEVELOPING:
+        //             Serial.println("DEVELOPING");
+        //             break;
+        //         case MONITORING:
+        //             Serial.println("MONITORING");
+        //             break;
+        //         case INDEVELOPMENU:
+        //             Serial.println("INDEVELOPMENU");
+        //             break;
+        //         default:
+        //             Serial.println("NULL");
+        //             break;
+        //         }
+        // #endif
         if (State.currentState != IDLE && newState == IDLE)
         {
             MenuUI::refreshMenu();
         }
         State.currentState = newState;
-#ifdef DEBUG
-        DEBUG_PRINT("State became: ");
-        switch (State.currentState)
-        {
-        case IDLE:
-            DEBUG_PRINT("IDLE");
-            break;
-        case DEVELOPING:
-            DEBUG_PRINT("DEVELOPING");
-            break;
-        case MONITORING:
-            DEBUG_PRINT("MONITORING");
-            break;
-        default:
-            DEBUG_PRINT("NULL");
-            DEBUG_TRACE();
-            break;
-        }
-#endif
-
+        redrawMenu = true;
         return;
     }
 } // namespace StateManager

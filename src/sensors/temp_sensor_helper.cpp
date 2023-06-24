@@ -6,7 +6,8 @@ namespace TempSensors
     unsigned long requestTime;            // Timestamp for temp request.
     OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup onewire instance for comms.
     DallasTemperature tempSensors(&oneWireBus);
-    DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; // Addr for tank sensor. change to fit yours.
+    // DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; // Addr for tank sensor. change to fit yours.
+    DeviceAddress tankThermometer = {0x28, 0x2B, 0x17, 0x94, 0x97, 0x03, 0x03, 0x77};
 
     void initializeTempSensor()
     {
@@ -50,6 +51,11 @@ namespace TempSensors
         {
             return SENSOR_NOT_READY;
         }
+    }
+
+    void monitorTemp()
+    {
+        return;
     }
 
 } // namespace TempSensor

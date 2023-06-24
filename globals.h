@@ -10,6 +10,7 @@
 /* -------------------------------------------------------------------------- */
 
 #define STR_BUFF_LEN 16
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0])) // Macro to count the number of elems in array
 
 /* -------------------------------------------------------------------------- */
 /*                       Constants for C-41 Development                       */
@@ -32,6 +33,9 @@
 #define AGITATE_DUR 10
 #define STD_AGITATE_EVERY_DUR 30
 #define FIXING_DUR 480
+
+#define MONITOR_SET_TEMP_MIN 1000
+#define MONITOR_SET_TEMP_MAX 6000
 
 /* -------------------------------------------------------------------------- */
 /*                             Constants Interface                            */
@@ -66,15 +70,6 @@
 #define LCD_ADDR 0x27
 #define LCD_COLS 16
 #define LCD_ROWS 2
-
-// Locations to store the custom icons on the HITACHI driver for 16X02 LCD displays.
-//  for more information please check createChar() documentation
-#define LEFT_ARR_ICON_ADDR (char)60  // character built into LCD driver.
-#define RIGHT_ARR_ICON_ADDR (char)62 // char built into LCD driver.
-#define ENTER_ICON_ADDR 1
-#define EXIT_ICON_ADDR 2
-#define TANK_TEMP_ICON_ADDR 3
-#define BATT_CHAR_ADDR 6
 
 /* ------------------------------ Motor Control ----------------------------- */
 /* Motor Driver Pins, based on the mini L298 motor driver, change to suit your
@@ -141,15 +136,21 @@ enum OperationStateType
     IDLE,
     DEVELOPING,
     INDEVELOPMENU,
-    MONITORING
+    MONITORING,
 };
 
 // Indicators such as the LED and the buzzer use this to indicate status
 enum IndicatorStateType
 {
     BUSY,
-    BUSYAuto, // Busy bot doesn't require calls from loop()
+    BUSYAuto, // Busy but doesn't require calls from loop()
     AVAILABLE
+};
+enum IndicatorParamType
+{
+    START,
+    STOP,
+    TOGGLE
 };
 enum ChargeLevelType
 {
@@ -180,6 +181,8 @@ struct StateType
     ChargeLevelType batteryLevel;
     // Track global time. updated every loop of the main loop.
     unsigned long currentMillis;
+    // Temp Set for monitoring
+    int setTemp;
     // Flag for encoder interrupt routine (true if moved)
     bool checkEncoder;
 };
@@ -189,7 +192,11 @@ struct StateType
 
 extern StateType State;
 
+extern EncoderInputType command;
+
 // String to be used to print to the LCD.
 extern char tmpStr[STR_BUFF_LEN];
+
+extern bool redrawMenu;
 
 #endif

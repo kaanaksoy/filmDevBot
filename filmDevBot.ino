@@ -3,10 +3,10 @@
   - Automates your film development using AP Tanks.
 */
 
-//#define DEBUG // Uncomment to turn on debug statements.
 #include <ArduinoTrace.h>
 #include <LCD_I2C.h>
 
+#define DEBUG // Uncomment to turn on debug statements.
 /* --------------------------------- Headers -------------------------------- */
 
 #include "globals.h" // Global variables
@@ -28,9 +28,16 @@ StateType State = {
     IndicatorStateType::AVAILABLE,
     ChargeLevelType::FullCharge,
     millis(),
+    2200,
 };
 
-char tmpStr[STR_BUFF_LEN] = "";
+EncoderInputType command;
+
+char tmpStr[STR_BUFF_LEN];
+
+bool redrawMenu = true;
+unsigned long battMillis;
+unsigned long tempMillis;
 
 void setup()
 {
@@ -38,15 +45,6 @@ void setup()
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
-
-  Display::initDisplay();
-  MenuUI::createMenu();
-  SystemEncoder::initEncoder();
-  EncoderInputType command = EncoderNone;
-  BatteryMonitor::initBatteryChargeMeasurement();
-  TempSensors::initializeTempSensor();
-  Indicators::initLEDs();
-
   // Initialize motor control pins.
   pinMode(AGITATE_MOT_1, OUTPUT);
   pinMode(AGITATE_MOT_2, OUTPUT);
@@ -58,44 +56,95 @@ void setup()
   pinMode(RED_LED_PIN, OUTPUT);
   // Initialize encoder button.
   pinMode(ENC_SW, INPUT);
+
+  SystemEncoder::initEncoder();
+  BatteryMonitor::initBatteryChargeMeasurement();
+  TempSensors::initializeTempSensor();
+  Indicators::initLEDs();
+  battMillis = millis();
+  tempMillis = battMillis;
+
+  command = EncoderNone;
+  Display::initDisplay();
+  MenuUI::createMenu();
 }
 
 /* ---------------------------------- LOOP ---------------------------------- */
 
 void loop()
 {
+  // Do housekeeping tasks
   State.currentMillis = millis();
-  BatteryMonitor::updateChargeLevel(State.batteryLevel);
+
+  if (redrawMenu)
+  {
+    MenuUI::printBatteryInfo();
+    MenuUI::printTempReadings(TempSensors::getTankTemp());
+    redrawMenu = false;
+  }
+
+  if (State.currentMillis - tempMillis >= 500)
+  {
+    TempSensors::requestTankTemp();
+    MenuUI::printTempReadings(TempSensors::getTankTemp());
+    tempMillis = State.currentMillis;
+  }
+  if (State.currentMillis - battMillis >= 5000)
+  {
+    BatteryMonitor::updateChargeLevel(State.batteryLevel);
+    MenuUI::printBatteryInfo();
+    battMillis = State.currentMillis;
+  }
 
   if (State.ledState == IndicatorStateType::BUSY)
     Indicators::blinkLEDs();
+
   if (State.buzzerState == IndicatorStateType::BUSY)
     Indicators::buzz();
 
+  // Do State related action
   switch (State.currentState)
   {
+    /* ---------------------------- Developing State ---------------------------- */
   case OperationStateType::DEVELOPING:
     DevelopFilm::develop();
-    TempSensors::requestTankTemp();
-    MenuUI::printTempReadings(TempSensors::getTankTemp());
     break;
-
+    /* --------------------------- Develop Menu State --------------------------- */
   case OperationStateType::INDEVELOPMENU:
-    TempSensors::requestTankTemp();
-    MenuUI::printTempReadings(TempSensors::getTankTemp());
+    // TempSensors::requestTankTemp();
+    // MenuUI::printTempReadings(TempSensors::getTankTemp());
     break;
+    /* ---------------------------- Monitoring State ---------------------------- */
+  case OperationStateType::MONITORING:
+    if (TempSensors::getTankTemp() != SENSOR_NOT_READY)
+    {
+      DevelopFilm::Monitoring(int(TempSensors::getTankTemp() * 100));
+    }
 
+    // command = EncoderNone;
+    command = SystemEncoder::getCommand(command);
+    if (command == EncoderExit)
+    {
+      DevelopFilm::Monitoring(State.setTemp, IndicatorParamType::STOP);
+      StateManager::setOperationState(IDLE);
+    }
+    break;
+    /* ------------------------------- IDLE STATE ------------------------------- */
   case OperationStateType::IDLE:
-  
-    int fid = 0; // Function ID
+    command = SystemEncoder::getCommand(command);
+    // TempSensors::requestTankTemp();
+    // MenuUI::printTempReadings(TempSensors::getTankTemp());
 
+    int fid = 0; // Function ID
     // Info text from menu
     const char *info;
     bool layerChanged = false; // Should navigate layers?
-    EncoderInputType command = SystemEncoder::getCommand(command);
-    TempSensors::requestTankTemp();
-    MenuUI::printTempReadings(TempSensors::getTankTemp());
     // Call menu methods based on command selection
+    if (command != EncoderNone)
+    {
+      redrawMenu = true;
+    }
+
     switch (command)
     {
     case EncoderExit:
@@ -130,23 +179,22 @@ void loop()
         switch (fid)
         {
         case MenuUI::MenuC41:
-          DEBUG_TRACE();
           DevelopFilm::ColorC41();
           break;
         case MenuUI::MenuCustom:
           DevelopFilm::Custom();
           break;
+        case MenuUI::MenuMonitor:
+          DevelopFilm::StartMonitor();
         default:
           break;
         }
       }
     }
-    TempSensors::requestTankTemp();
-    MenuUI::printTempReadings(TempSensors::getTankTemp());
-  break;
+    // TempSensors::requestTankTemp();
+    // MenuUI::printTempReadings(TempSensors::getTankTemp());
+    break;
 
-  case OperationStateType::MONITORING:
-    StateManager::setOperationState(IDLE);
   default:
     break;
   }

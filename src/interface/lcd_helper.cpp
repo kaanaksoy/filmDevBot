@@ -26,6 +26,8 @@ namespace Display
         gLCD.createChar(ENTER_ICON_ADDR, Icons::enterCustomChar);
         gLCD.createChar(EXIT_ICON_ADDR, Icons::exitCustomChar);
         gLCD.createChar(TANK_TEMP_ICON_ADDR, Icons::tankTempCustomChar);
+        gLCD.createChar(DWN_ARROW_ADDR, Icons::downArrowCustomChar);
+        gLCD.createChar(UP_DOWN_ARROWS_ICON_ADDR, Icons::upDownArrows);
         pickBatteryIcon();
     }
 

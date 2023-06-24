@@ -9,14 +9,13 @@
 
 namespace Indicators
 {
-    enum IndicatorParamType
-    {
-        START,
-        STOP,
-        TOGGLE
-    };
 
     void initLEDs();
+
+    void tempLEDs(IndicatorParamType action = IndicatorParamType::TOGGLE);
+
+    void relativeLED(int val, int target);
+
     void blinkLEDs(CRGB::HTMLColorCode color = CRGB::Red,
                    int interval = BLINK_NORMAL_INTERVAL,
                    IndicatorParamType action = IndicatorParamType::TOGGLE);

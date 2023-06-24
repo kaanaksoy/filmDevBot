@@ -3,6 +3,13 @@
 namespace Indicators
 {
     CRGB gLEDS[NUM_LEDS]; // Create an array to hold the LED colors.
+    DEFINE_GRADIENT_PALETTE(temp_gp){
+        0, 0, 0, 255,        // Blue
+        NUM_LEDS, 255, 0, 0, // Red
+        255, 255, 0, 0,      // RED
+    };
+
+    CRGBPalette16 tempPal = temp_gp;
 
     // In addition to creating the led object, execute a quick rainbow effect for style points.
     void initLEDs()
@@ -24,6 +31,63 @@ namespace Indicators
             FastLED.show();
             delay(17);
         }
+    }
+
+    void tempLEDs(IndicatorParamType action)
+    {
+        switch (action)
+        {
+        case IndicatorParamType::START:
+            State.ledState = IndicatorStateType::BUSYAuto;
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                gLEDS[i] = ColorFromPalette(tempPal, i);
+                gLEDS[(NUM_LEDS / 2) - 1].setRGB(0, 0, 0);
+                gLEDS[(NUM_LEDS / 2)].setRGB(0, 255, 0);
+                gLEDS[(NUM_LEDS / 2) + 1].setRGB(0, 0, 0);
+                FastLED.show();
+                delay(17);
+            }
+            break;
+        case IndicatorParamType::STOP:
+            fill_solid(gLEDS, NUM_LEDS, CRGB::Black);
+            FastLED.show();
+            State.ledState = IndicatorStateType::AVAILABLE;
+            break;
+        case IndicatorParamType::TOGGLE:
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                gLEDS[i] = ColorFromPalette(tempPal, i);
+                gLEDS[(NUM_LEDS / 2) - 1].setRGB(0, 0, 0);
+                gLEDS[(NUM_LEDS / 2)].setRGB(0, 255, 0);
+                gLEDS[(NUM_LEDS / 2) + 1].setRGB(0, 0, 0);
+            }
+        default:
+            break;
+        }
+
+        return;
+    }
+
+    void relativeLED(int val, int target)
+    {
+        int centerIndex = (NUM_LEDS / 2) + ((val - target) / 100);
+
+        if (centerIndex > NUM_LEDS - 1)
+        {
+            centerIndex = NUM_LEDS - 1;
+        }
+        else if (centerIndex < 0)
+        {
+            centerIndex = 0;
+        }
+
+        tempLEDs();
+        gLEDS[centerIndex - 1].setRGB(0, 0, 0);
+        gLEDS[centerIndex].setRGB(0, 255, 0);
+        gLEDS[centerIndex + 1].setRGB(0, 0, 0);
+
+        FastLED.show();
     }
 
     // Simple non-blocking blink function.
@@ -76,7 +140,8 @@ namespace Indicators
         return;
     }
     // Calculates how many leds to be lit per step based on num leds available
-    int calculateProgressBarStep(int maxSteps){
+    int calculateProgressBarStep(int maxSteps)
+    {
         return NUM_LEDS / maxSteps;
     }
 
@@ -116,13 +181,14 @@ namespace Indicators
             if (progress == 100)
             {
                 fill_solid(gLEDS, NUM_LEDS, CRGB::Green);
-            }  else
+            }
+            else
             {
                 fill_solid(gLEDS, progress, CRGB::Green);
             }
-            
+
             // int ledsToFill = (progress * NUM_LEDS / 100) + 2; // Calculate the number of leds to fill per step.
-            //fill_solid(gLEDS, progress, CRGB::Green);
+            // fill_solid(gLEDS, progress, CRGB::Green);
         default:
             break;
         }

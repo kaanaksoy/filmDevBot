@@ -26,6 +26,8 @@ namespace TempSensors
 
     float getTankTemp();
 
+    void monitorTemp();
+
 } // namespace TempSensor
 
 #endif
