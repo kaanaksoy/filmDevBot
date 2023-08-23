@@ -3,7 +3,6 @@
 
 namespace BatteryMonitor
 {
-
     void initBatteryChargeMeasurement()
     {
         analogReference(INTERNAL);
@@ -54,8 +53,6 @@ namespace BatteryMonitor
         }
     }
 
-    void powerOff()
-    {
-        return;
-    }
+    void handlePowerOffRequest() { return; }
+
 } // namespace BatteryWatcher

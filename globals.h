@@ -106,7 +106,7 @@
 /*                         Battery Charge Measurement                         */
 /* -------------------------------------------------------------------------- */
 
-#define POWEROFF_PIN 2
+#define KILL_BUS 2
 
 #define BATT_SENSE_PIN A0
 #define VREF 1071             // Reference voltage on pin 21 of ATMEGA. Please change this to match yours.
@@ -198,5 +198,6 @@ extern EncoderInputType command;
 extern char tmpStr[STR_BUFF_LEN];
 
 extern bool redrawMenu;
+extern bool shutDownRequestReceived;
 
 #endif

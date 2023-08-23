@@ -35,6 +35,7 @@ EncoderInputType command;
 
 char tmpStr[STR_BUFF_LEN];
 
+bool shutDownRequestReceived = false; // Flag for Shutdown ISR
 bool redrawMenu = true;
 unsigned long battMillis;
 unsigned long tempMillis;
@@ -56,6 +57,9 @@ void setup()
   pinMode(RED_LED_PIN, OUTPUT);
   // Initialize encoder button.
   pinMode(ENC_SW, INPUT);
+  // Communication bus for power state.
+  pinMode(KILL_BUS, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(KILL_BUS), shutDownISR, FALLING);
 
   SystemEncoder::initEncoder();
   BatteryMonitor::initBatteryChargeMeasurement();
@@ -73,6 +77,25 @@ void setup()
 
 void loop()
 {
+  if (shutDownRequestReceived)
+  {
+    Serial.println("Power Off Requested.");
+    if (State.currentState != DEVELOPING)
+    {
+      Serial.println("Shutting Down");
+      detachInterrupt(digitalPinToInterrupt(KILL_BUS));
+      delay(1000);
+      digitalWrite(KILL_BUS, LOW);
+      pinMode(KILL_BUS, OUTPUT);
+      Serial.println("KILL confirmation sent");
+    }
+    else
+    {
+      Serial.println("Shutdown Refused");
+    }
+    shutDownRequestReceived = false;
+  }
+
   // Do housekeeping tasks
   State.currentMillis = millis();
 
@@ -198,4 +221,10 @@ void loop()
   default:
     break;
   }
+}
+
+void shutDownISR()
+{
+  Serial.println("ShutdownISR");
+  shutDownRequestReceived = true;
 }

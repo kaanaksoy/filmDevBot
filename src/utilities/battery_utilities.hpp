@@ -6,11 +6,13 @@
 
 namespace BatteryMonitor
 {
+
     void initBatteryChargeMeasurement();
 
     // Returns in which range the battery charge level is.
     void updateChargeLevel(ChargeLevelType prevChargeLevel);
 
-    void powerOff();
+    void handlePowerOffRequest();
+
 } // namespace BatteryWatcher
 #endif
