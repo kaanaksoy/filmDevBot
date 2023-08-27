@@ -1,12 +1,15 @@
 #ifndef TEMP_SENSOR_HELPER_HPP
 #define TEMP_SENSOR_HELPER_HPP
 
-#define SENSOR_ERR -99.9f      // Used in comm with temp sensors
-#define SENSOR_NOT_READY -8.8f // Used for comm with temp sensors
+// Define error values for temperature readings
+#define SENSOR_ERR -99.9f
+#define SENSOR_NOT_READY -8.8f
 
+/* -------------------------------- Libraries ------------------------------- */
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+/* --------------------------------- Headers -------------------------------- */
 #include "../../globals.h"
 #include "../../debugUtils.h"
 #include "../interface/indicator_helpers.hpp"
@@ -14,19 +17,20 @@
 
 namespace TempSensors
 {
-    extern OneWire oneWireBus; // Setup onewire instance for comms.
-    extern DallasTemperature tempSensors;
-    extern DeviceAddress tankThermometer; // Addr for tank sensor. change to fit yours.
+    extern OneWire oneWireBus;            // Setup onewire instance for comms.
+    extern DallasTemperature tempSensors; // DallasTemperature instance
+    extern DeviceAddress tankThermometer; // Address for tank sensor. change to fit yours.
 
-    extern unsigned long requestTime; // Timestamp for temp request.
+    extern unsigned long requestTime; // Timestamp for temperature request
 
+    // Initialize the temperature sensor
     void initializeTempSensor();
 
+    // Request temperature from the tank sensor
     void requestTankTemp();
 
+    // Get the tank temperature reading
     float getTankTemp();
-
-    void monitorTemp();
 
 } // namespace TempSensor
 

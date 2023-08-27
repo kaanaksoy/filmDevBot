@@ -7,12 +7,11 @@
 namespace BatteryMonitor
 {
 
+    // Initialize battery charge measurement
     void initBatteryChargeMeasurement();
 
-    // Returns in which range the battery charge level is.
+    // Update the charge level based on the battery voltage
     void updateChargeLevel(ChargeLevelType prevChargeLevel);
-
-    void handlePowerOffRequest();
 
 } // namespace BatteryWatcher
 #endif

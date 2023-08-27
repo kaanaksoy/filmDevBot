@@ -1,8 +1,9 @@
 #ifndef ICONS_HPP
 #define ICONS_HPP
 
-// Locations to store the custom icons on the HITACHI driver for 16X02 LCD displays.
-//  for more information please check createChar() documentation
+/* Locations to store the custom icons on the HITACHI driver for 16X02 LCD displays.
+   for more information please check createChar() documentation */
+
 #define LEFT_ARR_ICON_ADDR (char)0b111100  // character built into LCD driver.
 #define RIGHT_ARR_ICON_ADDR (char)0b111110 // char built into LCD driver.
 

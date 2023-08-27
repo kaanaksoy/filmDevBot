@@ -1,4 +1,5 @@
 #ifndef DEVELOP_FILM_HPP
+// Define the header guard symbol to prevent multiple inclusion
 #define DEVELOP_FILM_HPP
 #pragma once
 
@@ -14,9 +15,11 @@
 #include "../interface/indicator_helpers.hpp"
 #include "../sensors/temp_sensor_helper.hpp"
 
+// This header guards against multiple inclusion of the same file.
+
 namespace DevelopFilm
 {
-  // Strings
+  // Strings for different film types and states
   const char p_C41[] PROGMEM = "C-41";
   const char p_E6[] PROGMEM = "E-6";
   const char p_BW[] PROGMEM = "B&W";
@@ -38,33 +41,32 @@ namespace DevelopFilm
   const char p_every[] PROGMEM = "Intrvl";
   const char p_secs[] PROGMEM = "Secs";
 
-  // --- ColorC41 | Film Development Functions ---
+  /* -------------------------------------------------------------------------- */
+  /*              Function prototypes for the DevelopFilm namespace             */
+  /* -------------------------------------------------------------------------- */
+
+  // ColorC41 function for color film development
   void
   ColorC41();
 
+  // Custom function for custom film development settings
   void Custom();
 
   /*
-      --- agitate | Film Development Helper Functions ---
+      Agitate helper function for film development
       duration: Agitate duration in seconds
-      AGITATE_MOT_1: Motor Control Pin 1
-      AGITATE_MOT_2: Motor Control Pin 2
-
-      Runs the agitate motor for the amount of time provided,
-      each time in a different direction.
   */
   int agitate(uint16_t duration = 0);
 
-  /*
-    --- develop | Film Development Functions ---
-    Develop function that handles the development process.
-  */
+  // Develop function for the film development process
   int develop(int devDurSec = 0, int fstAgitDurSec = 0, int agitDurSec = 0,
               int agitEvryDurSec = 0, int fixDurSec = 0, int fstFixAgitDurSec = 0,
               int fixAgitDurSec = 0, int fixAgitEveryDurSec = 0);
 
+  // StartMonitor function to initiate temperature monitoring
   void StartMonitor();
 
+  // Monitoring function to monitor temperature and control indicators
   void Monitoring(int tempReading, IndicatorParamType action = IndicatorParamType::TOGGLE);
 
 } // namespace DevelopFilm

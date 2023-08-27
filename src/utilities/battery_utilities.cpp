@@ -3,29 +3,30 @@
 
 namespace BatteryMonitor
 {
+    // Initialize battery charge measurement
     void initBatteryChargeMeasurement()
     {
-        analogReference(INTERNAL);
+        analogReference(INTERNAL); // Set the analog reference to internal (1.1V) reference
         DEBUG_PRINT("Reading from AREF INTERNAL");
-        updateChargeLevel(State.batteryLevel);
+        updateChargeLevel(State.batteryLevel); // Update the initial charge level
     }
 
-    // Returns in which range the battery charge level is.
+    // Update the charge level based on the battery voltage
     void updateChargeLevel(ChargeLevelType prevChargeLevel)
     {
-        static unsigned long lastBatteryCheckTime;
+        static unsigned long lastBatteryCheckTime; // Store the last time battery level was checked
 
-        // Return if we don't need to update the battery level.
+        // Return if it's not time to update the battery level yet
         if (State.currentMillis < lastBatteryCheckTime + BATT_CHECK_PERIOD)
         {
             return;
         }
 
-        // Calculatesthe battery voltage.
-        // Conversion coefficient is required to convert the voltage based on the voltage divider used.
+        // Read the voltage from the battery sense pin and convert to millivolts
         unsigned long voltageRead = (unsigned long)analogRead(BATT_SENSE_PIN) * VREF / CONVERSION_COEFF;
         lastBatteryCheckTime = State.currentMillis;
 
+        // Determine the charge level based on voltage thresholds
         if (voltageRead >= FULL_CHARGE_FLOOR)
         {
             State.batteryLevel = FullCharge;
@@ -52,7 +53,4 @@ namespace BatteryMonitor
             return;
         }
     }
-
-    void handlePowerOffRequest() { return; }
-
 } // namespace BatteryWatcher

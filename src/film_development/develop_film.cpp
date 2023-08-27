@@ -2,19 +2,24 @@
 
 namespace DevelopFilm
 {
+    // Define a structure to hold development parameters
     typedef struct
     {
         char paramName[15];
         unsigned int value = 0;
     } devParam;
 
+    // Custom film development function
     void Custom()
     {
+        // Store the previous state and set the current state to development menu
         OperationStateType prevState = State.currentState;
         StateManager::setOperationState(INDEVELOPMENU);
 
+        // Initialize an array to store development parameters
         devParam devParams[8];
 
+        // Initialize parameter names using macros and strings
         sprintf_P(devParams[0].paramName, PSTR("%S %S"), p_dev, p_Dur);
         sprintf_P(devParams[1].paramName, PSTR("%S %S %S"), p_fst, p_Agit, p_Dur);
         sprintf_P(devParams[2].paramName, PSTR("%S %S"), p_Agit, p_Dur);
@@ -25,6 +30,7 @@ namespace DevelopFilm
         sprintf_P(devParams[7].paramName, PSTR("%S %S"), p_fixing, p_Agit, p_every);
 
         /* ------------------------------- Start Menu ------------------------------- */
+        // Display the custom development menu and wait for user input
         Display::readyDisplay();
         sprintf_P(tmpStr, PSTR("%S %S"), p_Custom, p_dev);
         Display::gLCD.print(tmpStr);
@@ -45,7 +51,7 @@ namespace DevelopFilm
         }
 
         /* ---------------------------- Get Cycle Params ---------------------------- */
-
+        // Loop to get user input for development parameters
         Display::readyDisplay();
         Display::gLCD.setCursor(15, 0);
         Display::gLCD.write(ENTER_ICON_ADDR);
@@ -104,7 +110,7 @@ namespace DevelopFilm
             command = EncoderNone;
         }
         /* -------------------------- Confirm Cycle Params -------------------------- */
-
+        // Loop to confirm the entered parameters
         for (int i = 0; i < NELEMS(devParams); i++)
         {
             // Serial.println(devParams[i].paramName);
@@ -131,6 +137,7 @@ namespace DevelopFilm
         SystemEncoder::encoderAwaitConfirm();
 
         /* ------------------------------- Start Cycle ------------------------------ */
+        // Display messages and initiate film development with parameters
         Display::readyDisplay();
         Display::gLCD.setCursor(0, 1);
         sprintf_P(tmpStr, PSTR("%S, %S"), p_running, p_dev);
@@ -144,16 +151,19 @@ namespace DevelopFilm
 
         return;
     }
-    // Func for C41 Dev.
+    // Color C-41 film development function
     void ColorC41()
     {
+        // Store the previous state and set the current state to development menu
         OperationStateType prevState = State.currentState;
         StateManager::setOperationState(INDEVELOPMENU);
 
+        // Initialize variables for push/pull value and duration
         int8_t pushPullValue = 0; // var to store push pull value of process.
         uint16_t duration;
 
         /* ----------------- Ask for desired push pull val from user ---------------- */
+        // Display menu for the user to select push/pull value
         Display::readyDisplay();
 
         sprintf_P(tmpStr, PSTR("%S %S"), p_C41, p_dev);
@@ -186,9 +196,6 @@ namespace DevelopFilm
                     pushPullValue--;
                     valChanged = true;
                 }
-                // pushPullValue--;
-                // if (pushPullValue < MAX_PULL)
-                //     pushPullValue = MAX_PULL;
                 break;
             case EncoderRight:
                 if (pushPullValue < MAX_PUSH)
@@ -196,9 +203,6 @@ namespace DevelopFilm
                     pushPullValue++;
                     valChanged = true;
                 }
-                // pushPullValue++;
-                // if (pushPullValue > MAX_PUSH)
-                //     pushPullValue = MAX_PUSH;
                 break;
             case EncoderExit:
                 StateManager::setOperationState(prevState);
@@ -210,6 +214,7 @@ namespace DevelopFilm
             }
         }
         /* ----------------------- Confirm the push pull value ---------------------- */
+        // Display confirmation for push/pull value and duration
         Display::readyDisplay();
         sprintf_P(tmpStr, PSTR("%S, %s%d %S"),
                   p_C41,
@@ -256,6 +261,7 @@ namespace DevelopFilm
         }
 
         /* -------------------------- Start Dev and Fixing -------------------------- */
+        // Display messages and initiate film development and fixing
         Display::readyDisplay();
         Display::gLCD.setCursor(0, 1);
         sprintf_P(tmpStr, PSTR("%S, %S"), p_running, p_dev);
@@ -277,7 +283,7 @@ namespace DevelopFilm
                 int agitEvryDurSec, int fixDurSec, int fstFixAgitDurSec,
                 int fixAgitDurSec, int fixAgitEveryDurSec)
     {
-        // parameters of the current development.
+        // Development process variables and flags
         static int devCyclesRemaining;
         static unsigned int devPadding;
         static int devAgitationInterval; // agitEveryDurSec * 1000
@@ -306,7 +312,7 @@ namespace DevelopFilm
         switch (State.currentState)
         {
         case INDEVELOPMENU:
-            // We were called for the first time, set params and start first agitate.
+            // Initialization and setup for the development process
             StateManager::setOperationState(DEVELOPING);
 
             // Calculate the necessary parameters.
@@ -331,14 +337,14 @@ namespace DevelopFilm
             // Set the progressBar var
             totalProgressSteps = devCyclesRemaining + 2; // +1 for first agitate + 1 for padding
             /* ----------------------------- Dev Operations ----------------------------- */
-
-            // Start the first agitation.
+            // Start the first agitation and begin development process
             Indicators::progressBarLEDs(); // Start the progressBar
             agitate(fstAgitDurSec);
             agitateRunning = true;
             return 0;
             break;
-        case DEVELOPING:                  // Develop was called because we were running.
+        case DEVELOPING:
+            // Continue the development process
             if (!firstDevAgitateComplete) // We need to check if we completed the first agitation before we move on.
             {
                 agitateStatus = agitate();
@@ -576,19 +582,18 @@ namespace DevelopFilm
         case IDLE:
         case MONITORING:
         default:
+            // Error handling for unexpected states
             DEBUG_PRINT("Develop called unexpectedly");
             return -1;
             break;
         }
-        DEBUG_PRINT("Develop falled through");
+        // Fallback error case
+        DEBUG_PRINT("Develop fell through");
         return -1;
     }
     /*
         --- agitate | Film Development Helper Functions ---
         duration: Agitate duration in seconds
-        AGITATE_MOT_1: Motor Control Pin 1
-        AGITATE_MOT_2: Motor Control Pin 2
-
         Runs the agitate motor for the amount of time provided,
         each time in a different direction.
     */
@@ -597,6 +602,7 @@ namespace DevelopFilm
         DEBUG_PRINT("Agit Called");
         DEBUG_PRINT(duration);
 
+        // Agitation process variables and flags
         static bool agitateDirectionFlag = true;
         static bool motorRunning;
         static unsigned long motorStartMillis;
@@ -605,6 +611,7 @@ namespace DevelopFilm
         switch (duration != 0)
         {
         case true:
+            // Start the agitation motor in a specific direction
             DEBUG_PRINT("Started Motors");
             if (!motorRunning)
             {
@@ -638,6 +645,7 @@ namespace DevelopFilm
             }
             break;
         case false:
+            // Check if agitation duration has passed and stop the motor
             DEBUG_PRINT("Agit check");
             if (millis() - motorStartMillis >= motorToRunFor)
             {
@@ -657,12 +665,17 @@ namespace DevelopFilm
         return -1;
     }
 
+    /*
+     StartMonitor | Film Development Helper Function
+     Starts the monitoring process to track the development and agitation.
+     */
     void StartMonitor()
     {
-        // TODO Set state, get desired temp, print menu
+        // Set the monitoring state
         StateManager::setOperationState(MONITORING);
         char setStr[5];
 
+        // Display messages and start the monitoring process
         Display::gLCD.clear();
         Display::gLCD.setCursor(0, 0);
         sprintf(tmpStr, "Desired Temp");
@@ -684,8 +697,6 @@ namespace DevelopFilm
                     ((State.setTemp / 100U) % 10),
                     ((State.setTemp / 10U) % 10),
                     ((State.setTemp / 1U) % 10));
-            // Serial.println(String(State.setTemp).substring(0, 2));
-            // Serial.println(String(State.setTemp).substring(2, 4));
             Display::gLCD.print(setStr);
             Display::gLCD.setCursor(5, 1);
             switch (command)
@@ -731,9 +742,13 @@ namespace DevelopFilm
         Monitoring(State.setTemp, IndicatorParamType::START);
         return;
     }
-
+    /*
+      Monitoring | Film Development Helper Function
+      Monitors the development and agitation processes.
+     */
     void Monitoring(int tempReading, IndicatorParamType action)
     {
+        // Monitoring process variables and flags
         static int prevReading;
         static unsigned long lastUpdateMillis;
 
@@ -762,7 +777,8 @@ namespace DevelopFilm
             return;
             break;
         case IndicatorParamType::TOGGLE:
-
+            // Update display with monitoring information
+            // Check for user interrupt or process completion
             if (millis() - lastUpdateMillis >= 5000)
             {
                 int rateOfChange = (tempReading - prevReading) / int((millis() - lastUpdateMillis - 50) / 1000);
@@ -788,6 +804,7 @@ namespace DevelopFilm
             return;
             break;
         case IndicatorParamType::STOP:
+        // Display monitoring complete message and return to idle state
         default:
             Indicators::tempLEDs(IndicatorParamType::STOP);
             Display::gLCD.write(HOR_LINE_ADDR);

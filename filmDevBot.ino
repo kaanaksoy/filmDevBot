@@ -1,12 +1,18 @@
 /*
   Film Development Bot
   - Automates your film development using AP Tanks.
+
+  This is the main code file for the film development machine.
+  It initializes various components, handles input and user interfaces,
+  and performs different actions based on the current state of the machine.
+  It's a comprehensive file that orchestrates the behavior of the
+  film development process and interfaces with the hardware and user input.
 */
 
 #include <ArduinoTrace.h>
 #include <LCD_I2C.h>
 
-#define DEBUG // Uncomment to turn on debug statements.
+// #define DEBUG // Uncomment to turn on debug statements.
 /* --------------------------------- Headers -------------------------------- */
 
 #include "globals.h" // Global variables
@@ -22,6 +28,7 @@
 #include "src/interface/lcd_helper.hpp"
 
 /* ---------------------------------- SETUP --------------------------------- */
+// Initialize the State struct with default values
 StateType State = {
     OperationStateType::IDLE,
     IndicatorStateType::AVAILABLE,
@@ -44,8 +51,9 @@ void setup()
 {
 
 #ifdef DEBUG
-  Serial.begin(9600);
+  Serial.begin(9600); // Initialize serial communication for debugging
 #endif
+
   // Initialize motor control pins.
   pinMode(AGITATE_MOT_1, OUTPUT);
   pinMode(AGITATE_MOT_2, OUTPUT);
@@ -55,22 +63,20 @@ void setup()
   // Initialize UI pins.
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RED_LED_PIN, OUTPUT);
-  // Initialize encoder button.
-  pinMode(ENC_SW, INPUT);
-  // Communication bus for power state.
-  pinMode(KILL_BUS, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(KILL_BUS), shutDownISR, FALLING);
+  pinMode(ENC_SW, INPUT);                                                 // Initialize encoder button.
+  pinMode(KILL_BUS, INPUT_PULLUP);                                        // Communication bus for power state.
+  attachInterrupt(digitalPinToInterrupt(KILL_BUS), shutDownISR, FALLING); // Attach interrupt for shutdown.
 
-  SystemEncoder::initEncoder();
-  BatteryMonitor::initBatteryChargeMeasurement();
-  TempSensors::initializeTempSensor();
-  Indicators::initLEDs();
-  battMillis = millis();
-  tempMillis = battMillis;
+  SystemEncoder::initEncoder();                   // Initialize the encoder
+  BatteryMonitor::initBatteryChargeMeasurement(); // Initialize battery monitoring
+  TempSensors::initializeTempSensor();            // Initialize temperature sensor
+  Indicators::initLEDs();                         // Initialize LEDs
+  battMillis = millis();                          // Initialize battery check interval
+  tempMillis = battMillis;                        // Initialize temperature reading interval
 
   command = EncoderNone;
-  Display::initDisplay();
-  MenuUI::createMenu();
+  Display::initDisplay(); // Initialize the display
+  MenuUI::createMenu();   // Create the menu structure
 }
 
 /* ---------------------------------- LOOP ---------------------------------- */
@@ -79,19 +85,20 @@ void loop()
 {
   if (shutDownRequestReceived)
   {
-    Serial.println("Power Off Requested.");
+    // Handle shutdown request
+    DEBUG_PRINT("Power Off Requested.");
     if (State.currentState != DEVELOPING)
     {
-      Serial.println("Shutting Down");
+      DEBUG_PRINT("Shutting Down");
       detachInterrupt(digitalPinToInterrupt(KILL_BUS));
       delay(1000);
       digitalWrite(KILL_BUS, LOW);
       pinMode(KILL_BUS, OUTPUT);
-      Serial.println("KILL confirmation sent");
+      DEBUG_PRINT("KILL confirmation sent");
     }
     else
     {
-      Serial.println("Shutdown Refused");
+      DEBUG_PRINT("Shutdown Refused");
     }
     shutDownRequestReceived = false;
   }
@@ -125,7 +132,7 @@ void loop()
   if (State.buzzerState == IndicatorStateType::BUSY)
     Indicators::buzz();
 
-  // Do State related action
+  // Do action based on the current state
   switch (State.currentState)
   {
     /* ---------------------------- Developing State ---------------------------- */
@@ -134,8 +141,7 @@ void loop()
     break;
     /* --------------------------- Develop Menu State --------------------------- */
   case OperationStateType::INDEVELOPMENU:
-    // TempSensors::requestTankTemp();
-    // MenuUI::printTempReadings(TempSensors::getTankTemp());
+    // No actions required.
     break;
     /* ---------------------------- Monitoring State ---------------------------- */
   case OperationStateType::MONITORING:
@@ -143,8 +149,6 @@ void loop()
     {
       DevelopFilm::Monitoring(int(TempSensors::getTankTemp() * 100));
     }
-
-    // command = EncoderNone;
     command = SystemEncoder::getCommand(command);
     if (command == EncoderExit)
     {
@@ -155,8 +159,6 @@ void loop()
     /* ------------------------------- IDLE STATE ------------------------------- */
   case OperationStateType::IDLE:
     command = SystemEncoder::getCommand(command);
-    // TempSensors::requestTankTemp();
-    // MenuUI::printTempReadings(TempSensors::getTankTemp());
 
     int fid = 0; // Function ID
     // Info text from menu
@@ -209,13 +211,12 @@ void loop()
           break;
         case MenuUI::MenuMonitor:
           DevelopFilm::StartMonitor();
+        case MenuUI::MenuNone: // Fallthrough intended.
         default:
           break;
         }
       }
     }
-    // TempSensors::requestTankTemp();
-    // MenuUI::printTempReadings(TempSensors::getTankTemp());
     break;
 
   default:
@@ -223,8 +224,9 @@ void loop()
   }
 }
 
+// Interrupt Service Routine for shutdown
 void shutDownISR()
 {
-  Serial.println("ShutdownISR");
+  DEBUG_PRINT("ShutdownISR");
   shutDownRequestReceived = true;
 }

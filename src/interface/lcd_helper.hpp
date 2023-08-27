@@ -1,4 +1,6 @@
 #ifndef LCD_HELPER_HPP
+// Define the header guard symbol to prevent multiple inclusion
+#define LCD_HELPER_HPP
 
 /* -------------------------------- Libraries ------------------------------- */
 #include <Wire.h>
@@ -12,25 +14,26 @@
 
 namespace Display
 {
+    // Declare an instance of the hd44780_I2Cexp class for the LCD display
     extern hd44780_I2Cexp gLCD;
-    // Initialization for the display
+
+    // Initialization function for the display
     void initDisplay();
 
-    // Sets display parameters to baseline.
+    // Function to set display parameters to baseline
     void readyDisplay();
 
-    // Create and store custom chars on LCD driver memory.
+    // Function to create and store custom characters on the LCD driver memory
     void initCustomChars();
 
-    /* Due to Hitachi driver constraints on custom chars, battery indicator is
-        re-created as necessary
+    /* Due to Hitachi driver constraints on custom characters, the battery indicator
+       is re-created as necessary
     */
     void pickBatteryIcon();
 
-    // Basic function to print strings from an array in progmem.
+    // Basic function to print strings from an array in progmem
     inline void glcdPrint_P(const char *const *stringTableMember) __attribute__((always_inline));
 
 } // namespace Display
 
-#define LCD_HELPER_HPP
 #endif

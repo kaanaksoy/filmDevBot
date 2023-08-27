@@ -4,27 +4,25 @@
 namespace TempSensors
 {
     unsigned long requestTime;            // Timestamp for temp request.
-    OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup onewire instance for comms.
+    OneWire oneWireBus(ONE_WIRE_BUS_PIN); // Setup OneWire instance for communication.
     DallasTemperature tempSensors(&oneWireBus);
-    // DeviceAddress tankThermometer = {0x28, 0x3B, 0x00, 0x97, 0x94, 0x07, 0x03, 0x56}; // Addr for tank sensor. change to fit yours.
-    // DeviceAddress tankThermometer = {0x28, 0x2B, 0x17, 0x94, 0x97, 0x03, 0x03, 0x77};
     DeviceAddress tankThermometer = {0x28, 0xC6, 0x74, 0x57, 0x04, 0xE1, 0x3D, 0x73};
 
     void initializeTempSensor()
     {
-        // oneWireBus.begin(ONE_WIRE_BUS_PIN);
-        // tempSensors.setOneWire(&oneWireBus);
+        // Initialize the temperature sensor and OneWire communication.
         DEBUG_PRINT("Locating devices");
         tempSensors.begin();
         DEBUG_PRINT("Devices found");
         DEBUG_PRINT(tempSensors.getDeviceCount());
         DEBUG_PRINT("Devices");
-        tempSensors.setResolution(10);
-        tempSensors.setWaitForConversion(false);
+        tempSensors.setResolution(10);           // Set temperature resolution to 10 bits.
+        tempSensors.setWaitForConversion(false); // Don't wait for conversion.
     }
 
     void requestTankTemp()
     {
+        // Request temperature data from the tankThermometer sensor.
         if (State.currentMillis - requestTime >= 400)
         {
             tempSensors.requestTemperaturesByAddress(tankThermometer);
@@ -34,29 +32,24 @@ namespace TempSensors
 
     float getTankTemp()
     {
-
+        // Request temperature data from the tankThermometer sensor.
         if (State.currentMillis - requestTime >= 200)
         {
             float tempC = tempSensors.getTempC(tankThermometer);
-            if (tempC != DEVICE_DISCONNECTED_C)
+            if (tempC != DEVICE_DISCONNECTED_C) // Check for valid temperature reading
             {
-                return tempC;
+                return tempC; // Return the temperature in Celsius.
             }
             else
             {
                 DEBUG_PRINT("Error: Could not read temperature data");
-                return SENSOR_ERR;
+                return SENSOR_ERR; // Return an error value if reading fails.
             }
         }
         else
         {
-            return SENSOR_NOT_READY;
+            return SENSOR_NOT_READY; // Return indication that the sensor is not ready yet.
         }
-    }
-
-    void monitorTemp()
-    {
-        return;
     }
 
 } // namespace TempSensor
